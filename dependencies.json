@@ -1,0 +1,44 @@
+{
+  "libraries": [
+    {
+      "group": "junit",
+      "name": "junit",
+      "version": "4.12"
+    },
+    {
+      "group": "org.jetbrains.kotlin",
+      "name": "kotlin-gradle-plugin",
+      "version": "1.2.30"
+    },
+    {
+      "group": "org.jetbrains.kotlin",
+      "name": "kotlin-reflect",
+      "version": "1.2.30"
+    },
+    {
+      "group": "org.jetbrains.kotlin",
+      "name": "kotlin-stdlib",
+      "version": "1.2.30"
+    },
+    {
+      "group": "org.jetbrains.kotlin",
+      "name": "kotlin-test-junit",
+      "version": "1.2.30"
+    },
+    {
+      "group": "org.jetbrains.kotlinx",
+      "name": "kotlinx-coroutines-core",
+      "version": "0.22.5"
+    },
+    {
+      "group": "org.jetbrains.kotlinx",
+      "name": "kotlinx-coroutines-core-common",
+      "version": "0.22.5"
+    },
+    {
+      "group": "org.jetbrains.kotlinx",
+      "name": "kotlinx-coroutines-jdk8",
+      "version": "0.22.5"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+apply plugin: 'application'
+apply plugin: 'kotlin'
+
+dependencies {
+  implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
+  implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core']
+  implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core-common']
+  implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-jdk8']
+
+  testImplementation libraries['junit:junit']
+  testImplementation libraries['org.jetbrains.kotlin:kotlin-test-junit']
+}
+
+kotlin {
+  experimental {
+    coroutines "enable"
+  }
+}
