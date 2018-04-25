@@ -25,7 +25,8 @@ class AnkaVMManagerTest {
     val template = findTemplate(testTemplate)
     assertNotNull("Please make sure your local registry has $testTemplate template", template)
     val instanceId = manager.startVM(template!!.id)
-    manager.waitForVMToStart(instanceId)
+    val info = manager.waitForVMToStart(instanceId)
     assertTrue(manager.stopVM(instanceId))
+    assertEquals("Started", info.sessionState)
   }
 }
