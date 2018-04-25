@@ -5,7 +5,7 @@ package com.veertu.ankaMgmtSdk.exceptions;
  */
 public class AnkaMgmtException extends Exception {
 
-    public AnkaMgmtException(Throwable e) {
-        super(e);
-    }
+  public AnkaMgmtException(Throwable e) {
+    super(e);
+  }
 }

@@ -7,20 +7,28 @@ import org.json.JSONObject;
  */
 public class PortForwardingRule {
 
-    private final int hostPort;
-    private final int guestPort;
+  private final int hostPort;
+  private final int guestPort;
 
-    public PortForwardingRule(JSONObject portForwardingJsonObj) {
-        this.hostPort = portForwardingJsonObj.getInt("host_port");
-        this.guestPort = portForwardingJsonObj.getInt("guest_port");
+  public PortForwardingRule(JSONObject portForwardingJsonObj) {
+    this.hostPort = portForwardingJsonObj.getInt("host_port");
+    this.guestPort = portForwardingJsonObj.getInt("guest_port");
 
-    }
+  }
 
-    public int getHostPort() {
-        return hostPort;
-    }
+  public int getHostPort() {
+    return hostPort;
+  }
 
-    public int getGuestPort() {
-        return guestPort;
-    }
+  public int getGuestPort() {
+    return guestPort;
+  }
+
+  @Override
+  public String toString() {
+    return "PortForwardingRule{" +
+      "hostPort=" + hostPort +
+      ", guestPort=" + guestPort +
+      '}';
+  }
 }

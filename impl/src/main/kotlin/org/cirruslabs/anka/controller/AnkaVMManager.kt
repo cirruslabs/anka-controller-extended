@@ -7,7 +7,7 @@ import kotlinx.coroutines.experimental.runBlocking
 
 class AnkaVMManager(val communicator: AnkaMgmtCommunicator) {
   fun startVM(templateId: String, tag: String? = null): String {
-    return communicator.startVm(templateId, tag)
+    return communicator.startVm(templateId, tag, null)
   }
   fun stopVM(instanceId: String): Boolean {
     return communicator.terminateVm(instanceId)

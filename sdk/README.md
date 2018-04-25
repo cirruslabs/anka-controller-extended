@@ -1,1 +1,1 @@
-Based of [ankaMgmtSdk](https://github.com/veertuinc/jenkins-anka-ci/tree/master/src/main/java/com/ankaMgmtSdk)
+Based of [ankaMgmtSdk](https://github.com/jenkinsci/anka-build-plugin/tree/master/src/main/java/com/ankaMgmtSdk)
