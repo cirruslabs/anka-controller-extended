@@ -107,6 +107,9 @@ public class AnkaMgmtCommunicator {
             return null;
         }
         String logicalResult = jsonResponse.getString("status");
+        if (logicalResult.equals("FAIL")) {
+          throw new IllegalStateException(jsonResponse.getString("message"));
+        }
         if (logicalResult.equals("OK")) {
             JSONArray uuidsJson = jsonResponse.getJSONArray("body");
             if (uuidsJson.length() >= 1 ){

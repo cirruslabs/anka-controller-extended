@@ -6,4 +6,12 @@ public class AnkaVmTemplate extends AnkaVMRepresentation {
         this.id = uuid;
         this.name = name;
     }
+
+  @Override
+  public String toString() {
+    return "AnkaVmTemplate{" +
+      "id='" + id + '\'' +
+      ", name='" + name + '\'' +
+      '}';
+  }
 }

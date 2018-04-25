@@ -1,8 +1,9 @@
 apply plugin: 'application'
 apply plugin: 'kotlin'
 
+mainClassName = 'org.cirruslabs.anka.controller.ControllerApplicationKt'
+
 dependencies {
-  implementation project(":api")
   implementation project(":sdk")
   implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core']

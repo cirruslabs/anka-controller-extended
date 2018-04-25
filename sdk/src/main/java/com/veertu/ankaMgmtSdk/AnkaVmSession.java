@@ -33,6 +33,17 @@ public class AnkaVmSession extends AnkaVMRepresentation {
     public AnkaVmInfo getVmInfo() {
         return vmInfo;
     }
+
+  @Override
+  public String toString() {
+    return "AnkaVmSession{" +
+      "sessionState='" + sessionState + '\'' +
+      ", vmId='" + vmId + '\'' +
+      ", vmInfo=" + vmInfo +
+      ", id='" + id + '\'' +
+      ", name='" + name + '\'' +
+      '}';
+  }
 }
 
 
