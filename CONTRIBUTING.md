@@ -4,7 +4,7 @@ Unfortunately, at the moment there is no CI so some manual work needs to be done
 In order to run tests, we need to have Anka Controller and Anka registry to be running locally.
 It can be done in 3 easy steps:
   1. Download and unarchive Anka Controller and Registry from [here](https://veertu.com/download-anka-build/).
-  2. Open `anka-controller.docker` and change `REGISTRY_ADDR` to `http://anka-registry`
+  2. Open `anka-controller.docker` and change `REGISTRY_ADDR` to `http://127.0.0.1:80`
   3. Run `docker-compose up` to start controller and registry.
   
 Now, let's make this local registry a default one:
