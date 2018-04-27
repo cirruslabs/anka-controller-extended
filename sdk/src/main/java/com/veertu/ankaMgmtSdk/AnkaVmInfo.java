@@ -48,12 +48,12 @@ public class AnkaVmInfo {
     return vmIp;
   }
 
-  public String getHostIp() {
-    return hostIp;
-  }
-
   public List<PortForwardingRule> getPortForwardingRules() {
     return portForwardingRules;
+  }
+
+  public String getHostIp() {
+    return hostIp;
   }
 
   @Override

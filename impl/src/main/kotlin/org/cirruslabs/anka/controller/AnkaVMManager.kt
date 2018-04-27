@@ -1,35 +1,34 @@
 package org.cirruslabs.anka.controller
 
+import com.jcabi.ssh.Shell
+import com.jcabi.ssh.SshByPassword
 import com.veertu.ankaMgmtSdk.AnkaMgmtCommunicator
+import com.veertu.ankaMgmtSdk.AnkaMgmtVm
 import com.veertu.ankaMgmtSdk.AnkaVmSession
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
+import com.veertu.ankaMgmtSdk.ConcAnkaMgmtVm
+
 
 class AnkaVMManager(val communicator: AnkaMgmtCommunicator) {
   fun startVM(templateId: String, tag: String? = null): String {
     return communicator.startVm(templateId, tag, null)
   }
+
   fun stopVM(instanceId: String): Boolean {
     return communicator.terminateVm(instanceId)
   }
 
-  fun waitForVMToStart(instanceId: String): AnkaVmSession {
-    return runBlocking {
-      var vmInfo = vmInfo(instanceId)
-      while(true) {
-        println(vmInfo)
-        if (vmInfo.sessionState == "Scheduling") {
-          delay(10_000)
-          vmInfo = vmInfo(instanceId)
-        } else {
-          break
-        }
-      }
-      vmInfo
-    }
+  fun waitForVMToStart(instanceId: String): AnkaMgmtVm {
+    val vm = ConcAnkaMgmtVm(instanceId, communicator, 22)
+    vm.waitForBoot()
+    return vm
   }
 
   fun vmInfo(instanceId: String): AnkaVmSession {
     return communicator.showVm(instanceId)
+  }
+
+  fun execute(vm: AnkaMgmtVm, script: String): String {
+    val shell = SshByPassword(vm.connectionIp, vm.connectionPort, "anka", "admin")
+    return Shell.Plain(shell).exec(script)
   }
 }

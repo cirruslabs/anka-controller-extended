@@ -5,6 +5,7 @@ mainClassName = 'org.cirruslabs.anka.controller.ControllerApplicationKt'
 
 dependencies {
   implementation project(":sdk")
+  implementation libraries['com.jcabi:jcabi-ssh']
   implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core']
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core-common']
