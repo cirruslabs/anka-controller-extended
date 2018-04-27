@@ -28,8 +28,8 @@ class AnkaVMManagerTest {
     val vm = manager.waitForVMToStart(instanceId)
 
     try {
-      val output = manager.execute(vm, "pwd")
-      assertEquals("/Users/anka", output)
+      val output = manager.execute(vm, "pwd\necho \$USER")
+      assertEquals("/Users/anka\nanka\n", output)
     } finally {
       assertTrue(manager.stopVM(instanceId))
     }
