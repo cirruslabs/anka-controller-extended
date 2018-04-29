@@ -2,6 +2,7 @@ package org.cirruslabs.anka.controller
 
 import com.veertu.ankaMgmtSdk.AnkaMgmtCommunicator
 import com.veertu.ankaMgmtSdk.AnkaVmTemplate
+import org.cirruslabs.anka.controller.manager.AnkaVMManager
 import org.junit.Assert.*
 import org.junit.Test
 

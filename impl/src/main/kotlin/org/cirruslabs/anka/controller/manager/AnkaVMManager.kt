@@ -1,4 +1,4 @@
-package org.cirruslabs.anka.controller
+package org.cirruslabs.anka.controller.manager
 
 import com.jcabi.ssh.Shell
 import com.jcabi.ssh.SshByPassword
@@ -29,6 +29,7 @@ class AnkaVMManager(val communicator: AnkaMgmtCommunicator) {
 
   fun execute(vm: AnkaMgmtVm, script: String): String {
     val shell = SshByPassword(vm.connectionIp, vm.connectionPort, "anka", "admin")
+    // todo: investigate how to do fire and forget
     return Shell.Plain(shell).exec(script)
   }
 }

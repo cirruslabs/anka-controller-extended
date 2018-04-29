@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package org.cirruslabs.ci.services.auth;
+
+import "google/protobuf/empty.proto";
+
+option java_multiple_files = true;
+option java_package = "org.cirruslabs.anka.controller.grpc";
+option java_outer_classname = "ControllerProto";
+
+service Controller {
+  rpc StartVM (StartVMRequest) returns (StartVMResponse) {
+  }
+  rpc StopVM (StopVMRequest) returns (StopVMResponse) {
+  }
+  rpc Ping (google.protobuf.Empty) returns (google.protobuf.Empty) {
+  }
+}
+
+message StartVMRequest {
+  string template_id = 1;
+  string script = 2;
+}
+
+message StartVMResponse {
+  string vm_id = 1;
+}
+
+message StopVMRequest {
+  string vm_id = 1;
+}
+
+message StopVMResponse {
+  bool success = 1;
+}

@@ -1,15 +1,63 @@
-apply plugin: 'application'
-apply plugin: 'kotlin'
+apply plugin: "application"
+apply plugin: "java-library"
+apply plugin: "kotlin"
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "com.palantir.docker"
 
 mainClassName = 'org.cirruslabs.anka.controller.ControllerApplicationKt'
 
+buildscript {
+  dependencies {
+    classpath libraries['com.github.jengelman.gradle.plugins:shadow']
+    classpath libraries['com.palantir.gradle.docker:gradle-docker']
+  }
+}
+
+shadowJar {
+  baseName = 'anka-controller-extended'
+  configurations = [
+    project.configurations.compileClasspath,
+    project.configurations.runtimeClasspath
+  ]
+}
+
+jar {
+  manifest {
+    attributes(
+      'Main-Class': mainClassName
+    )
+  }
+}
+
+docker {
+  name 'cirrusci/anka-controller-extended:latest'
+  tags 'v1'
+  dockerfile file('Dockerfile')
+  files tasks.shadowJar.outputs, 'config'
+  pull true
+}
+
+runShadow {
+  args 'server', "$projectDir/config/anka_controller_extended_config.yml"
+}
+
 dependencies {
+  implementation project(":api")
   implementation project(":sdk")
   implementation libraries['com.jcabi:jcabi-ssh']
   implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core']
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core-common']
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-jdk8']
+  implementation libraries['io.dropwizard:dropwizard-core']
+  implementation libraries['io.dropwizard:dropwizard-jersey']
+  implementation libraries['io.grpc:grpc-auth']
+  implementation libraries['io.grpc:grpc-core']
+  implementation libraries['io.grpc:grpc-context']
+  implementation libraries['io.grpc:grpc-netty']
+  implementation libraries['io.grpc:grpc-protobuf']
+  implementation libraries['io.grpc:grpc-stub']
+  implementation libraries['io.netty:netty-tcnative-boringssl-static']
 
   testImplementation libraries['junit:junit']
   testImplementation libraries['org.jetbrains.kotlin:kotlin-test-junit']
