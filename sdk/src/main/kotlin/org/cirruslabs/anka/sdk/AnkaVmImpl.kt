@@ -4,7 +4,7 @@ import org.cirruslabs.anka.sdk.exceptions.AnkaException
 
 import java.io.IOException
 
-class ConcAnkaVm(override val id: String, private val communicator: AnkaCommunicator, private val sshConnectionPort: Int) : AnkaVm {
+class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunicator, private val sshConnectionPort: Int) : AnkaVm {
   private val waitUnit = 4000
   private val maxRunningTimeout = waitUnit * 20
   private val maxIpTimeout = waitUnit * 20

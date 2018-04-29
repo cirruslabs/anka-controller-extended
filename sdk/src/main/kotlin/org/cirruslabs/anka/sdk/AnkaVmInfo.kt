@@ -1,7 +1,6 @@
 package org.cirruslabs.anka.sdk
 
 import org.json.JSONObject
-import java.util.*
 
 data class AnkaVmInfo(
   val uuid: String,
@@ -11,7 +10,6 @@ data class AnkaVmInfo(
   val hostIp: String,
   val portForwardingRules: List<PortForwardingRule>
 ) {
-
   constructor(jsonObject: JSONObject) : this(
     jsonObject.getString("uuid"),
     jsonObject.getString("name"),

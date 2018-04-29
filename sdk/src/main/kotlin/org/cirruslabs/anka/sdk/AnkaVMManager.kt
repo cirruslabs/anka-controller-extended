@@ -14,7 +14,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   }
 
   fun waitForVMToStart(instanceId: String): AnkaVm {
-    val vm = ConcAnkaVm(instanceId, communicator, 22)
+    val vm = AnkaVmImpl(instanceId, communicator, 22)
     vm.waitForBoot()
     return vm
   }
