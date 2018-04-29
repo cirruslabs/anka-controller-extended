@@ -173,17 +173,17 @@ constructor(private val host: String, private val port: String) {
     val httpClient = HttpClientBuilder.create().build()
     val request: HttpRequestBase
     try {
-      when (method) {
+      request = when (method) {
         AnkaCommunicator.RequestMethod.POST -> {
           val postRequest = HttpPost(url)
-          request = setBody(postRequest, requestBody!!)
+          setBody(postRequest, requestBody!!)
         }
         AnkaCommunicator.RequestMethod.DELETE -> {
           val delRequest = HttpDeleteWithBody(url)
-          request = setBody(delRequest, requestBody!!)
+          setBody(delRequest, requestBody!!)
         }
-        AnkaCommunicator.RequestMethod.GET -> request = HttpGet(url)
-        else -> request = HttpGet(url)
+        AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
+        else -> HttpGet(url)
       }
 
       val response = httpClient.execute(request)
@@ -236,7 +236,7 @@ constructor(private val host: String, private val port: String) {
       setURI(uri)
     }
 
-    constructor() : super() {}
+    constructor() : super()
 
     override fun getMethod(): String {
       return "DELETE"

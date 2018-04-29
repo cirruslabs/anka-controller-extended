@@ -34,7 +34,7 @@ class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunic
 
   private val sessionInfoCache: AnkaVmSession?
     get() {
-      try {
+      return try {
         if (this.cachedVmSession == null || this.shouldInvalidate()) {
           val session = this.communicator.showVm(this.id)
           if (session != null) {
@@ -43,10 +43,10 @@ class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunic
             logger.info("info for vm is null")
           }
         }
-        return this.cachedVmSession
+        this.cachedVmSession
       } catch (e: AnkaException) {
         e.printStackTrace()
-        return null
+        null
       }
 
     }
