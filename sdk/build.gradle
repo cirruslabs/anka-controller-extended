@@ -1,6 +1,18 @@
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 
 dependencies {
+  implementation libraries['com.jcabi:jcabi-ssh']
+  implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
+  implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core']
+  implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-core-common']
+  implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-jdk8']
   implementation libraries['org.apache.httpcomponents:httpclient']
   implementation libraries['org.json:json']
+}
+
+kotlin {
+  experimental {
+    coroutines "enable"
+  }
 }

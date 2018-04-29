@@ -1,13 +1,13 @@
 package org.cirruslabs.anka.controller
 
-import com.veertu.ankaMgmtSdk.AnkaMgmtCommunicator
-import com.veertu.ankaMgmtSdk.AnkaVmTemplate
-import org.cirruslabs.anka.controller.manager.AnkaVMManager
+import org.cirruslabs.anka.sdk.AnkaCommunicator
+import org.cirruslabs.anka.sdk.AnkaVmTemplate
+import org.cirruslabs.anka.sdk.AnkaVMManager
 import org.junit.Assert.*
 import org.junit.Test
 
 class AnkaVMManagerTest {
-  val communicator = AnkaMgmtCommunicator("localhost", "8090")
+  val communicator = AnkaCommunicator("localhost", "8090")
   val manager = AnkaVMManager(communicator)
 
   val testTemplate = "osx-10.13-base"

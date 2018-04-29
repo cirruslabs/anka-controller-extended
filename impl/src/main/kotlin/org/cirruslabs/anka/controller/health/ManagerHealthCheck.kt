@@ -1,7 +1,7 @@
 package org.cirruslabs.anka.controller.health
 
 import com.codahale.metrics.health.HealthCheck
-import org.cirruslabs.anka.controller.manager.AnkaVMManager
+import org.cirruslabs.anka.sdk.AnkaVMManager
 
 class ManagerHealthCheck(val manager: AnkaVMManager): HealthCheck() {
   override fun check(): Result {

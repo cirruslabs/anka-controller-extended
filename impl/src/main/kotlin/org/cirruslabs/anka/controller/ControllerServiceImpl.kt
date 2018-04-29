@@ -5,7 +5,7 @@ import kotlinx.coroutines.experimental.async
 import org.cirruslabs.anka.controller.grpc.ControllerGrpc
 import org.cirruslabs.anka.controller.grpc.StartVMRequest
 import org.cirruslabs.anka.controller.grpc.StartVMResponse
-import org.cirruslabs.anka.controller.manager.AnkaVMManager
+import org.cirruslabs.anka.sdk.AnkaVMManager
 
 class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.ControllerImplBase() {
   override fun startVM(request: StartVMRequest, responseObserver: StreamObserver<StartVMResponse>) {
