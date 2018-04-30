@@ -4,7 +4,9 @@ import org.cirruslabs.anka.sdk.AnkaCommunicator
 import io.dropwizard.Application
 import io.dropwizard.setup.Environment
 import io.grpc.ServerBuilder
+import io.grpc.ServerInterceptor
 import io.grpc.ServerInterceptors
+import org.cirruslabs.anka.controller.auth.AccessTokenServerInterceptor
 import org.cirruslabs.anka.controller.config.AuthApplicationConfiguration
 import org.cirruslabs.anka.controller.health.ManagerHealthCheck
 import org.cirruslabs.anka.sdk.AnkaVMManager
@@ -17,17 +19,24 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
   override fun run(configuration: AuthApplicationConfiguration, environment: Environment) {
     val grpcConfig = configuration.grpc ?: throw IllegalStateException("grpc config should be provided!")
 
+    val env = System.getenv()
     val communicator = AnkaCommunicator(
-      System.getenv()["ANKA_HOST"] ?: throw IllegalStateException("ANKA_HOST environment variable should be defined!"),
-      System.getenv()["ANKA_PORT"] ?: throw IllegalStateException("ANKA_PORT environment variable should be defined!")
+      env["ANKA_HOST"] ?: throw IllegalStateException("ANKA_HOST environment variable should be defined!"),
+      env["ANKA_PORT"] ?: throw IllegalStateException("ANKA_PORT environment variable should be defined!")
     )
 
     val vmManager = AnkaVMManager(communicator)
 
     val serviceImpl = ControllerServiceImpl(vmManager)
 
+    val interceptors = mutableListOf<ServerInterceptor>()
+
+    env["ACCESS_TOKEN"]?.also {
+      interceptors.add(AccessTokenServerInterceptor(it))
+    }
+
     ServerBuilder.forPort(grpcConfig.port)
-      .addService(ServerInterceptors.intercept(serviceImpl))
+      .addService(ServerInterceptors.intercept(serviceImpl, interceptors))
       .build()
       .start()
 

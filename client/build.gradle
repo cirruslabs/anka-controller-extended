@@ -1,0 +1,9 @@
+apply plugin: "java-library"
+apply plugin: "kotlin"
+
+dependencies {
+  implementation project(":api")
+  implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
+  implementation libraries['io.grpc:grpc-auth']
+  implementation libraries['io.grpc:grpc-core']
+}
