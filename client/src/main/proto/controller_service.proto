@@ -11,6 +11,8 @@ service Controller {
   }
   rpc StopVM (StopVMRequest) returns (StopVMResponse) {
   }
+  rpc VmStatus (VMStatusRequest) returns (VMStatusResponse) {
+  }
 }
 
 message StartVMRequest {
@@ -28,4 +30,12 @@ message StopVMRequest {
 
 message StopVMResponse {
   bool success = 1;
+}
+
+message VMStatusRequest {
+  string vm_id = 1;
+}
+
+message VMStatusResponse {
+  string status = 1;
 }

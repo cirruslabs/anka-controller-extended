@@ -35,4 +35,17 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
       responseObserver.onError(e)
     }
   }
+
+  override fun vmStatus(request: VMStatusRequest, responseObserver: StreamObserver<VMStatusResponse>) {
+    try {
+      val status = manager.vmInfo(request.vmId)?.vmInfo?.status ?: "NotFound"
+      val response = VMStatusResponse.newBuilder()
+        .setStatus(status)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
+    } catch (e: Exception) {
+      responseObserver.onError(e)
+    }
+  }
 }
