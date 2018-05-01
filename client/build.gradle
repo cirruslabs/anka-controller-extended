@@ -79,10 +79,10 @@ sourceSets {
 }
 
 dependencies {
-  implementation libraries['com.google.protobuf:protobuf-java']
-  implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']
-  implementation libraries['io.grpc:grpc-auth']
-  implementation libraries['io.grpc:grpc-core']
-  implementation libraries['io.grpc:grpc-protobuf']
-  implementation libraries['io.grpc:grpc-stub']
+  api libraries['com.google.protobuf:protobuf-java']
+  api libraries['org.jetbrains.kotlin:kotlin-stdlib']
+  api libraries['io.grpc:grpc-auth']
+  api libraries['io.grpc:grpc-core']
+  api libraries['io.grpc:grpc-protobuf']
+  api libraries['io.grpc:grpc-stub']
 }

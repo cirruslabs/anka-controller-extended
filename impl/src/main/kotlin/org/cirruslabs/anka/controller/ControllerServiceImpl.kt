@@ -2,9 +2,7 @@ package org.cirruslabs.anka.controller
 
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.experimental.async
-import org.cirruslabs.anka.controller.grpc.ControllerGrpc
-import org.cirruslabs.anka.controller.grpc.StartVMRequest
-import org.cirruslabs.anka.controller.grpc.StartVMResponse
+import org.cirruslabs.anka.controller.grpc.*
 import org.cirruslabs.anka.sdk.AnkaVMManager
 
 class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.ControllerImplBase() {
@@ -21,6 +19,18 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
         val vm = manager.waitForVMToStart(instanceId)
         manager.execute(vm, request.script)
       }
+    } catch (e: Exception) {
+      responseObserver.onError(e)
+    }
+  }
+
+  override fun stopVM(request: StopVMRequest, responseObserver: StreamObserver<StopVMResponse>) {
+    try {
+      val response = StopVMResponse.newBuilder()
+        .setSuccess(manager.stopVM(request.vmId))
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
     } catch (e: Exception) {
       responseObserver.onError(e)
     }
