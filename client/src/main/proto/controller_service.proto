@@ -16,8 +16,9 @@ service Controller {
 }
 
 message StartVMRequest {
-  string template_id = 1;
-  string script = 2;
+  string template = 1;
+  string tag = 2;
+  string script = 3;
 }
 
 message StartVMResponse {

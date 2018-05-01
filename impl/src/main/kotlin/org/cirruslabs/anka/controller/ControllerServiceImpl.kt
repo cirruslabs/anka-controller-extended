@@ -8,7 +8,10 @@ import org.cirruslabs.anka.sdk.AnkaVMManager
 class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.ControllerImplBase() {
   override fun startVM(request: StartVMRequest, responseObserver: StreamObserver<StartVMResponse>) {
     try {
-      val instanceId = manager.startVM(request.templateId)
+      val instanceId = manager.startVM(
+        request.template,
+        if (request.tag.isNullOrEmpty()) null else request.tag
+      )
       val response = StartVMResponse.newBuilder()
         .setVmId(instanceId)
         .build()
