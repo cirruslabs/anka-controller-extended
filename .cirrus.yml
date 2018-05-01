@@ -12,3 +12,12 @@ compile_task:
   cleanup_before_cache_script:
     - rm -rf ~/.gradle/caches/$GRADLE_VERSION/
     - find ~/.gradle/caches/ -name "*.lock" -type f -delete
+
+deploy_docker_builder:
+  only_if: $CIRRUS_TAG != ''
+  depends_on: compile
+  environment:
+    DOCKER_USER_NAME: ENCRYPTED[a33be3495752e03c96e3fb8b722f813ee480c8858067b98a0dcd32515198d4a20c666dcface432642ead56f5bb625f4e]
+    DOCKER_PASSWORD: ENCRYPTED[e8ac49639b0ee6220e688a54c33a6be2a7c436367f996e394bfd0506a77661d784ec4fce617703b8a91449b969ff5c40]
+  build_script: ./scripts/build_docker.sh
+  push_script: ./scripts/push_docker.sh
