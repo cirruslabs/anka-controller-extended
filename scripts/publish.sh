@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 if [[ -v CIRRUS_TAG ]]; then
-  gradle bintrayUpload
+  gradle :client:bintrayUpload --stacktrace --info
 fi
