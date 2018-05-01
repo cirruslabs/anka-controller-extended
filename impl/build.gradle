@@ -32,7 +32,6 @@ runShadow {
 }
 
 dependencies {
-  implementation project(":api")
   implementation project(":client")
   implementation project(":sdk")
   implementation libraries['org.jetbrains.kotlin:kotlin-stdlib']

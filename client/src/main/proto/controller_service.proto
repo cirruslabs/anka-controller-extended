@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package org.cirruslabs.ci.services.auth;
 
-import "google/protobuf/empty.proto";
-
 option java_multiple_files = true;
 option java_package = "org.cirruslabs.anka.controller.grpc";
 option java_outer_classname = "ControllerProto";
@@ -12,8 +10,6 @@ service Controller {
   rpc StartVM (StartVMRequest) returns (StartVMResponse) {
   }
   rpc StopVM (StopVMRequest) returns (StopVMResponse) {
-  }
-  rpc Ping (google.protobuf.Empty) returns (google.protobuf.Empty) {
   }
 }
 
