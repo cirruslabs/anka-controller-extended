@@ -3,6 +3,7 @@ package org.cirruslabs.anka.sdk
 import com.jcabi.ssh.Shell
 import com.jcabi.ssh.SshByPassword
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
+import java.io.ByteArrayInputStream
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
@@ -29,6 +30,12 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   fun execute(vm: AnkaVm, script: String): String {
     val shell = SshByPassword(vm.connectionIp, vm.connectionPort, "anka", "admin")
     // todo: investigate how to do fire and forget
-    return Shell.Plain(shell).exec(script)
+    shell.exec(
+      "cat > /tmp/cirrus-build.sh",
+      ByteArrayInputStream(script.toByteArray()),
+      System.out,
+      System.err
+    )
+    return Shell.Plain(shell).exec("chmod +x /tmp/cirrus-build.sh && /bin/bash /tmp/cirrus-build.sh")
   }
 }
