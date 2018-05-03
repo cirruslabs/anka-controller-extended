@@ -85,4 +85,8 @@ dependencies {
   api libraries['io.grpc:grpc-core']
   api libraries['io.grpc:grpc-protobuf']
   api libraries['io.grpc:grpc-stub']
+
+  testImplementation libraries['junit:junit']
+  testImplementation libraries['org.jetbrains.kotlin:kotlin-test-junit']
+  testImplementation libraries['io.grpc:grpc-netty']
 }
