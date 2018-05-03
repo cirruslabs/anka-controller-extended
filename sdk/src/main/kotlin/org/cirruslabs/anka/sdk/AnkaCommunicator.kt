@@ -109,7 +109,7 @@ constructor(private val host: String, private val port: String) {
         return uuidsJson.getString(0)
       }
     }
-    throw AnkaException("Failed to create a VM!")
+    throw AnkaException("Failed to create a VM! $jsonResponse")
   }
 
   @Throws(AnkaException::class)
@@ -195,9 +195,10 @@ constructor(private val host: String, private val port: String) {
       val entity = response.entity
       if (entity != null) {
         val rd = BufferedReader(InputStreamReader(entity.content))
-        return JSONObject(rd.readText())
+        val response = rd.readText()
+        println(response)
+        return JSONObject(response)
       }
-
     } catch (e: HttpHostConnectException) {
       throw AnkaException(e)
     } catch (e: SSLException) {
