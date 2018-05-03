@@ -4,10 +4,11 @@
 
 Anka Controller has it's own [REST API](https://ankadoc.bitbucket.io/using-controller/#controller-rest-apis) which is very basic. Out of the box it lacks two important features:
 
-1. **Authorization**. There is no  
-2.
+1. **Authorization**. There is no built-in way to secure Controller's API endpoint. 
+2. **Startup script**. There is no option to provide a startup script when creating a VM.
 
-This project provides a ready to use Docker Container that 
+This project aim to solve these issues. It provides a Docker container that can connect to an Anka Controller through a VPN
+and exposes a GRPC service that has authorization and supports creating VMs with a custom startup script.
 
 ### VPN
 
