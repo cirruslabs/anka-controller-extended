@@ -10,7 +10,7 @@ class AnkaVMManagerTest {
   val communicator = AnkaCommunicator("localhost", "8090")
   val manager = AnkaVMManager(communicator)
 
-  val testTemplate = "osx-10.13-base"
+  val testTemplate = "high-sierra-base"
 
   fun findTemplate(name: String): AnkaVmTemplate? =
     communicator.listTemplates().find { it.name == name }
