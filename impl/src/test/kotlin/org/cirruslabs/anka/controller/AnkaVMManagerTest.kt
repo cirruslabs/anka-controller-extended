@@ -23,9 +23,8 @@ class AnkaVMManagerTest {
 
   @Test
   fun testVMCreation() {
-    val template = findTemplate(testTemplate)
-    assertNotNull("Please make sure your local registry has $testTemplate template", template)
-    val instanceId = manager.startVM(template!!.id)
+    assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))
+    val instanceId = manager.startVM(testTemplate)
     val vm = manager.waitForVMToStart(instanceId)
 
     try {

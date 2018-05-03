@@ -2,11 +2,14 @@ package org.cirruslabs.anka.sdk
 
 import com.jcabi.ssh.Shell
 import com.jcabi.ssh.SshByPassword
+import org.cirruslabs.anka.sdk.exceptions.AnkaException
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
-  fun startVM(templateId: String, tag: String? = null): String {
-    return communicator.startVm(templateId, tag, null)
+  fun startVM(templateName: String, tag: String? = null): String {
+    val template = (communicator.listTemplates().find { it.name == templateName }
+      ?: throw AnkaException("Template with name $templateName not found!"))
+    return communicator.startVm(template.id, tag, template.name)
   }
 
   fun stopVM(instanceId: String): Boolean {
