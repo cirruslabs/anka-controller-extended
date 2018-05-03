@@ -17,9 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		openconnect \
 	&& rm -rf /var/lib/apt/lists/*
 
-HEALTHCHECK  --interval=10s --timeout=10s --start-period=10s \
-  CMD /sbin/ifconfig tun0
-
 EXPOSE 8080
 EXPOSE 8239
 
