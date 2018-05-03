@@ -3,7 +3,7 @@
 set -e
 
 if [[ -v ANYCONNECT_SERVER ]]; then
-  ip tuntap add vpn0 mode tun0
+  ip tuntap add vpn0 mode tun
 
   ( echo yes; echo $ANYCONNECT_PASSWORD ) | \
     openconnect $ANYCONNECT_SERVER --user=$ANYCONNECT_USER --timestamp --background
