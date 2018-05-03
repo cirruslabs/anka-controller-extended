@@ -23,6 +23,7 @@ message StartVMRequest {
 
 message StartVMResponse {
   string vm_id = 1;
+  string error_message = 2;
 }
 
 message StopVMRequest {
@@ -31,6 +32,7 @@ message StopVMRequest {
 
 message StopVMResponse {
   bool success = 1;
+  string error_message = 2;
 }
 
 message VMStatusRequest {
@@ -39,4 +41,5 @@ message VMStatusRequest {
 
 message VMStatusResponse {
   string status = 1;
+  string error_message = 2;
 }

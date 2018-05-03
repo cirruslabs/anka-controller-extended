@@ -1,5 +1,6 @@
 package org.cirruslabs.anka.controller
 
+import io.grpc.StatusException
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.experimental.async
 import org.cirruslabs.anka.controller.grpc.*
@@ -26,7 +27,11 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
       }
     } catch (e: Exception) {
       e.printStackTrace()
-      responseObserver.onError(e)
+      val response = StartVMResponse.newBuilder()
+        .setErrorMessage(e.message)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
     }
   }
 
@@ -41,7 +46,11 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
       responseObserver.onCompleted()
     } catch (e: Exception) {
       e.printStackTrace()
-      responseObserver.onError(e)
+      val response = StopVMResponse.newBuilder()
+        .setErrorMessage(e.message)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
     }
   }
 
@@ -57,7 +66,11 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
       responseObserver.onCompleted()
     } catch (e: Exception) {
       e.printStackTrace()
-      responseObserver.onError(e)
+      val response = VMStatusResponse.newBuilder()
+        .setErrorMessage(e.message)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
     }
   }
 }
