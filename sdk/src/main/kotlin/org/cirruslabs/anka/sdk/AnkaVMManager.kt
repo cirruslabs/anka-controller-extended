@@ -1,16 +1,18 @@
 package org.cirruslabs.anka.sdk
 
-import com.jcabi.ssh.Shell
 import com.jcabi.ssh.SshByPassword
+import org.cactoos.io.DeadInput
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
-import java.io.ByteArrayInputStream
+import org.cirruslabs.anka.sdk.util.MultiOutputStream
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
-  fun startVM(templateName: String, tag: String? = null): String {
+  fun startVM(templateName: String, tag: String? = null, vmName: String? = null): String {
     val template = (communicator.listTemplates().find { it.name == templateName }
       ?: throw AnkaException("Template with name $templateName not found!"))
-    return communicator.startVm(template.id, tag, template.name)
+    return communicator.startVm(template.id, tag, vmName)
   }
 
   fun stopVM(instanceId: String): Boolean {
@@ -30,12 +32,15 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   fun execute(vm: AnkaVm, script: String): String {
     val shell = SshByPassword(vm.connectionIp, vm.connectionPort, "anka", "admin")
     // todo: investigate how to do fire and forget
+    val output = ByteArrayOutputStream()
+    println("Executing script...")
     shell.exec(
-      "cat > /tmp/cirrus-build.sh",
-      ByteArrayInputStream(script.toByteArray()),
-      System.out,
-      System.err
+      script,
+      DeadInput().stream(),
+      MultiOutputStream(output, listOf(System.out)),
+      MultiOutputStream(output, listOf(System.err))
     )
-    return Shell.Plain(shell).exec("chmod +x /tmp/cirrus-build.sh && /bin/bash /tmp/cirrus-build.sh")
+    println("Finished script execution!")
+    return output.toString(StandardCharsets.UTF_8.toString())
   }
 }
