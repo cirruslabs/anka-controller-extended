@@ -11,7 +11,8 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
       println("Starting VM ${request.template}:${request.tag}...")
       val instanceId = manager.startVM(
         request.template,
-        if (request.tag.isNullOrEmpty()) null else request.tag
+        if (request.tag.isNullOrEmpty()) null else request.tag,
+        if (request.vmName.isNullOrEmpty()) null else request.vmName
       )
       println("Started VM $instanceId from ${request.template}:${request.tag}!")
       val response = StartVMResponse.newBuilder()

@@ -19,6 +19,7 @@ message StartVMRequest {
   string template = 1;
   string tag = 2;
   string script = 3;
+  string vm_name = 4;
 }
 
 message StartVMResponse {
