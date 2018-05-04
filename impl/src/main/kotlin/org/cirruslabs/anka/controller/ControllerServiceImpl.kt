@@ -1,6 +1,5 @@
 package org.cirruslabs.anka.controller
 
-import io.grpc.StatusException
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.experimental.async
 import org.cirruslabs.anka.controller.grpc.*

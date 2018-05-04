@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		openconnect \
 	&& rm -rf /var/lib/apt/lists/*
 
+HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:8080/healthcheck || exit 1
+
 EXPOSE 8080
 EXPOSE 8239
 
