@@ -1,11 +1,16 @@
 package org.cirruslabs.anka.controller
 
 import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
 import org.cirruslabs.anka.controller.grpc.*
 import org.cirruslabs.anka.sdk.AnkaVMManager
+import java.util.concurrent.Executors
 
 class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.ControllerImplBase() {
+  // we use a cached thread pool executor since we want to not rely on default parallelism of DefaultDispatcher
+  private val dispatcher = Executors.newCachedThreadPool().asCoroutineDispatcher()
+
   override fun startVM(request: StartVMRequest, responseObserver: StreamObserver<StartVMResponse>) {
     try {
       println("Starting VM ${request.template}:${request.tag}...")
@@ -21,7 +26,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
       responseObserver.onNext(response)
       responseObserver.onCompleted()
 
-      async {
+      async(dispatcher) {
         val vm = manager.waitForVMToStart(instanceId)
         manager.execute(vm, request.script)
       }
