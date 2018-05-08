@@ -1,8 +1,9 @@
 package org.cirruslabs.anka.controller
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.cirruslabs.anka.sdk.AnkaCommunicator
-import org.cirruslabs.anka.sdk.AnkaVmTemplate
 import org.cirruslabs.anka.sdk.AnkaVMManager
+import org.cirruslabs.anka.sdk.AnkaVmTemplate
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -25,7 +26,9 @@ class AnkaVMManagerTest {
   fun testVMCreation() {
     assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))
     val instanceId = manager.startVM(testTemplate)
-    val vm = manager.waitForVMToStart(instanceId)
+    val vm = runBlocking {
+      manager.waitForVMToStart(instanceId)
+    }
 
     try {
       val output = manager.execute(vm, "pwd\necho \$USER")

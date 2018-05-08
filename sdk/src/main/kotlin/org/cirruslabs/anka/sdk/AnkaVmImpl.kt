@@ -1,9 +1,7 @@
 package org.cirruslabs.anka.sdk
 
 import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
-
 import java.io.IOException
 import java.time.Duration
 import java.time.LocalTime
@@ -113,48 +111,46 @@ class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunic
   }
 
   @Throws(AnkaException::class)
-  override fun waitForBoot(): String {
-    return runBlocking {
-      logger.info(String.format("waiting for vm %s to boot", id))
-      var waitStarted = LocalTime.now()
-      fun timeWaited(): Duration = Duration.between(waitStarted, LocalTime.now())
+  override suspend fun waitForBoot(): String {
+    logger.info(String.format("waiting for vm %s to boot", id))
+    var waitStarted = LocalTime.now()
+    fun timeWaited(): Duration = Duration.between(waitStarted, LocalTime.now())
 
-      while (status == "Scheduling") {
-        delay(waitDuration.toMillis())
-        logger.info(String.format("waiting for vm %s %s to start", id, timeWaited()))
-      }
-      waitStarted = LocalTime.now()
+    while (status == "Scheduling") {
+      delay(waitDuration.toMillis())
+      logger.info(String.format("waiting for vm %s %s to start", id, timeWaited()))
+    }
+    waitStarted = LocalTime.now()
 
-      if (status != "Starting" && status != "Started" && status != "Scheduled") {
-        logger.info(String.format("vm %s in unexpected state %s, terminating", id, status))
+    if (status != "Starting" && status != "Started" && status != "Scheduled") {
+      logger.info(String.format("vm %s in unexpected state %s, terminating", id, status))
+      terminate()
+      throw AnkaException("could not start vm")
+    }
+
+    while (status != "Started" || sessionInfoCache == null) {
+      delay(waitDuration.toMillis())
+      logger.info(String.format("waiting for vm %s %s to boot", id, timeWaited()))
+      if (timeWaited() > maxRunningTimeout) {
         terminate()
         throw AnkaException("could not start vm")
       }
-
-      while (status != "Started" || sessionInfoCache == null) {
-        delay(waitDuration.toMillis())
-        logger.info(String.format("waiting for vm %s %s to boot", id, timeWaited()))
-        if (timeWaited() > maxRunningTimeout) {
-          terminate()
-          throw AnkaException("could not start vm")
-        }
-      }
-      waitStarted = LocalTime.now()
-
-      logger.info(String.format("waiting for vm %s to get an ip ", id))
-      while (true) { // wait to get machine ip
-        if (ip != null)
-          break
-
-        delay(waitDuration.toMillis())
-        logger.info(String.format("waiting for vm %s %s to get ip ", id, timeWaited()))
-        if (timeWaited() > maxIpTimeout) {
-          terminate()
-          throw IOException("VM started but couldn't acquire ip")
-        }
-      }
-      ip ?: throw AnkaException("Failed to wait for instance to start!")
     }
+    waitStarted = LocalTime.now()
+
+    logger.info(String.format("waiting for vm %s to get an ip ", id))
+    while (true) { // wait to get machine ip
+      if (ip != null)
+        break
+
+      delay(waitDuration.toMillis())
+      logger.info(String.format("waiting for vm %s %s to get ip ", id, timeWaited()))
+      if (timeWaited() > maxIpTimeout) {
+        terminate()
+        throw IOException("VM started but couldn't acquire ip")
+      }
+    }
+    return ip ?: throw IOException("Failed to wait for instance to start!")
   }
 
   override fun terminate() {

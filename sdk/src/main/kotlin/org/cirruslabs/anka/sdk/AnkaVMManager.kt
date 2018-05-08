@@ -19,7 +19,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     return communicator.terminateVm(instanceId)
   }
 
-  fun waitForVMToStart(instanceId: String): AnkaVm {
+  suspend fun waitForVMToStart(instanceId: String): AnkaVm {
     val vm = AnkaVmImpl(instanceId, communicator, 22)
     vm.waitForBoot()
     return vm

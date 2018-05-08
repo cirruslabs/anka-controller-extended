@@ -19,7 +19,7 @@ interface AnkaVm {
   val info: String
 
   @Throws(InterruptedException::class, IOException::class, AnkaException::class)
-  fun waitForBoot(): String
+  suspend fun waitForBoot(): String
 
   fun terminate()
 
