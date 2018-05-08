@@ -11,8 +11,8 @@ import java.util.logging.Logger
 
 class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunicator, private val sshConnectionPort: Int) : AnkaVm {
   private val waitDuration = Duration.ofSeconds(2)
-  private val maxRunningTimeout = waitDuration.multipliedBy(20)
-  private val maxIpTimeout = waitDuration.multipliedBy(20)
+  private val maxRunningTimeout = Duration.ofMinutes(5)
+  private val maxIpTimeout = Duration.ofMinutes(2)
   private val cacheTime = 60 * 5 * 1000 // 5 minutes
   private var cachedVmSession: AnkaVmSession? = null
   private var lastCached = 0
@@ -116,13 +116,14 @@ class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunic
   override fun waitForBoot(): String {
     return runBlocking {
       logger.info(String.format("waiting for vm %s to boot", id))
-      val waitStarted = LocalTime.now()
+      var waitStarted = LocalTime.now()
       fun timeWaited(): Duration = Duration.between(waitStarted, LocalTime.now())
 
       while (status == "Scheduling") {
         delay(waitDuration.toMillis())
         logger.info(String.format("waiting for vm %s %s to start", id, timeWaited()))
       }
+      waitStarted = LocalTime.now()
 
       if (status != "Starting" && status != "Started" && status != "Scheduled") {
         logger.info(String.format("vm %s in unexpected state %s, terminating", id, status))
@@ -136,13 +137,12 @@ class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunic
         if (timeWaited() > maxRunningTimeout) {
           terminate()
           throw AnkaException("could not start vm")
-
         }
       }
+      waitStarted = LocalTime.now()
 
       logger.info(String.format("waiting for vm %s to get an ip ", id))
       while (true) { // wait to get machine ip
-
         if (ip != null)
           break
 
@@ -163,7 +163,6 @@ class AnkaVmImpl(override val id: String, private val communicator: AnkaCommunic
     } catch (e: AnkaException) {
       e.printStackTrace()
     }
-
   }
 
   companion object {
