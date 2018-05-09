@@ -62,7 +62,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
   override fun vmStatus(request: VMStatusRequest, responseObserver: StreamObserver<VMStatusResponse>) {
     try {
       println("Getting status for VM ${request.vmId}...")
-      val status = manager.vmInfo(request.vmId)?.vmInfo?.status ?: "NotFound"
+      val status = manager.vmInfo(request.vmId)?.sessionState ?: "NotFound"
       println("Status for VM ${request.vmId}: $status")
       val response = VMStatusResponse.newBuilder()
         .setStatus(status)
