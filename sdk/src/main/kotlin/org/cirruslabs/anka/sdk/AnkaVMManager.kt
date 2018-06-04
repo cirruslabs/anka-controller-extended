@@ -9,10 +9,10 @@ import java.nio.charset.StandardCharsets
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
-  fun startVM(templateName: String, tag: String? = null, vmName: String? = null): String {
+  fun startVM(templateName: String, tag: String? = null, vmName: String? = null, startupScript: String? = null): String {
     val template = (communicator.listTemplates().find { it.name == templateName }
       ?: throw AnkaException("Template with name $templateName not found!"))
-    return communicator.startVm(template.id, tag, vmName)
+    return communicator.startVm(template.id, tag, vmName,startupScript)
   }
 
   fun stopVM(instanceId: String): Boolean {

@@ -86,7 +86,7 @@ constructor(private val host: String, private val port: String) {
   }
 
   @Throws(AnkaException::class)
-  fun startVm(templateId: String, tag: String?, nameTemplate: String?): String {
+  fun startVm(templateId: String, tag: String?, nameTemplate: String?, startupScript: String?): String {
     val url = String.format("%s://%s:%s/api/v1/vm", this.scheme, this.host, this.port)
     val jsonObject = JSONObject()
     jsonObject.put("vmid", templateId)
@@ -94,6 +94,8 @@ constructor(private val host: String, private val port: String) {
       jsonObject.put("tag", tag)
     if (nameTemplate != null)
       jsonObject.put("name_template", nameTemplate)
+    if (startupScript != null)
+      jsonObject.put("startup_script", Base64.getEncoder().encodeToString(startupScript.toByteArray()))
     var jsonResponse: JSONObject? = null
     try {
       jsonResponse = this.doRequest(RequestMethod.POST, url, jsonObject)
