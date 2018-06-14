@@ -61,6 +61,27 @@ constructor(private val host: String, private val port: String) {
   }
 
   @Throws(AnkaException::class)
+  fun listNodes(): List<AnkaNodeInfo> {
+    val templates = ArrayList<AnkaNodeInfo>()
+    val url = String.format("%s://%s:%s/api/v1/node", this.scheme, this.host, this.port)
+    try {
+      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val logicalResult = jsonResponse!!.getString("status")
+      if (logicalResult == "OK") {
+        val nodesJson = jsonResponse.getJSONArray("body")
+        for (j in nodesJson) {
+          val jsonObj = j as JSONObject
+          templates.add(AnkaNodeInfo(jsonObj))
+        }
+      }
+    } catch (e: IOException) {
+      return templates
+    }
+
+    return templates
+  }
+
+  @Throws(AnkaException::class)
   fun getTemplateTags(templateId: String): List<String> {
     val tags = ArrayList<String>()
     val url = String.format("%s://%s:%s/api/v1/registry/vm?id=%s", this.scheme, this.host, this.port, templateId)

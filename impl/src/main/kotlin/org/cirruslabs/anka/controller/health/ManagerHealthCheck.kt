@@ -6,11 +6,11 @@ import org.cirruslabs.anka.sdk.AnkaVMManager
 class ManagerHealthCheck(val manager: AnkaVMManager): HealthCheck() {
   override fun check(): Result {
     return try {
-      val templates = manager.communicator.listTemplates()
+      val templates = manager.communicator.listNodes()
       if (templates.isNotEmpty()) {
-        Result.healthy("Number of templates available: ${templates.size}")
+        Result.healthy("Number of nodes available: ${templates.size}")
       } else {
-        Result.unhealthy("Controller returned 0 templates!")
+        Result.unhealthy("Controller returned 0 nodes!")
       }
     } catch (e: Exception) {
       Result.unhealthy(e)
