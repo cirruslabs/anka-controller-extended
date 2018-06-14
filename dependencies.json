@@ -101,11 +101,6 @@
       "version": "4.5.5"
     },
     {
-      "group": "com.jfrog.bintray.gradle",
-      "name": "gradle-bintray-plugin",
-      "version": "1.8.1"
-    },
-    {
       "group": "org.json",
       "name": "json",
       "version": "20180130"

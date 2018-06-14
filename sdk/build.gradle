@@ -7,16 +7,6 @@ ext {
   current_version = System.getenv().getOrDefault("CIRRUS_TAG", "SNAPSHOT")
 }
 
-buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath libraries['com.jfrog.bintray.gradle:gradle-bintray-plugin']
-  }
-}
-
-
 bintray {
   user = "fkorotkov"
   key  = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')

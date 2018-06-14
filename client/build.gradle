@@ -13,7 +13,6 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath libraries['com.jfrog.bintray.gradle:gradle-bintray-plugin']
     classpath libraries['com.google.protobuf:protobuf-gradle-plugin']
   }
 }
