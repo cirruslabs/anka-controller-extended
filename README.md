@@ -34,7 +34,7 @@ ACCESS_TOKEN=<Optional secret access token for authorization of clients>
 ```
 
 If you are planning to use ACE with [Cirrus CI](https://cirrus-ci.org), you need to make sure to publicly expose ACE.
-One way to do so is to reserve a static IP address and use it via `--address` when creating  ACE instance. Please refer 
+One way to do so is to reserve a static IP address and use it via `--address` when creating ACE instance. Please refer 
 to [documentation](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address) for more details. 
 
 Now let's create a Google Compute instance from `cirruslabs/anka-controller-extended` container with our custom 
@@ -45,6 +45,7 @@ gcloud beta compute instances create-with-container anka-controller-extended \
      --container-image docker.io/cirrusci/anka-controller-extended:latest \
      --tags anka-controller \
      --container-privileged \
+     --address $STATIC_IP \
      --container-env-file $PATH_TO_ENV_FILE
 ```
 
