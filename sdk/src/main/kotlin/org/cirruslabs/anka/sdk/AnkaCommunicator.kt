@@ -193,6 +193,7 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(IOException::class, AnkaException::class)
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
+    println("Making $method request to $url with body: $requestBody")
     val httpClient = HttpClientBuilder.create().build()
     val request: HttpRequestBase
     try {
