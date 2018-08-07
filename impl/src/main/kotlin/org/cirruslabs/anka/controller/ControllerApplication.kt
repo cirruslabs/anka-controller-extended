@@ -8,14 +8,21 @@ import io.grpc.ServerInterceptor
 import io.grpc.ServerInterceptors
 import org.cirruslabs.anka.controller.auth.AccessTokenServerInterceptor
 import org.cirruslabs.anka.controller.config.AuthApplicationConfiguration
+import org.cirruslabs.anka.controller.health.FutureHealthCheck
 import org.cirruslabs.anka.controller.health.ManagerHealthCheck
 import org.cirruslabs.anka.sdk.AnkaVMManager
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 fun main(vararg args: String) {
   ControllerApplication().run(*args)
 }
 
 class ControllerApplication : Application<AuthApplicationConfiguration>() {
+  val scheduledExecutorService: ScheduledExecutorService = Executors.newScheduledThreadPool(16)
+
   override fun run(configuration: AuthApplicationConfiguration, environment: Environment) {
     val grpcConfig = configuration.grpc ?: throw IllegalStateException("grpc config should be provided!")
 
@@ -46,5 +53,22 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
 
     println("Started GRPC server on ${grpcConfig.port} port...")
     println("Current health: ${healthCheck.execute()}")
+
+
+    val tryToSchedule = scheduledExecutorService.scheduleWithFixedDelay(
+      {
+        try {
+          vmManager.tryToSchedule()
+        } catch (e: Throwable) {
+          System.err.println("Failed to schedule: ${e.message}")
+          e.printStackTrace(System.err)
+        }
+      },
+      30L + Random().nextInt(15).toLong(),
+      15,
+      TimeUnit.SECONDS
+    )
+
+    environment.healthChecks().register("try-to-schedule", FutureHealthCheck(tryToSchedule))
   }
 }

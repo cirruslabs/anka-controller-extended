@@ -1,11 +1,11 @@
 package org.cirruslabs.anka.controller
 
+import com.google.protobuf.Empty
 import io.grpc.stub.StreamObserver
 import org.cirruslabs.anka.controller.grpc.*
 import org.cirruslabs.anka.sdk.AnkaVMManager
 
 class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.ControllerImplBase() {
-
   override fun startVM(request: StartVMRequest, responseObserver: StreamObserver<StartVMResponse>) {
     try {
       println("Starting VM ${request.template}:${request.tag}...")
@@ -34,8 +34,13 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
   override fun stopVM(request: StopVMRequest, responseObserver: StreamObserver<StopVMResponse>) {
     try {
       println("Stopping VM ${request.vmId}...")
+      val success = when (request.identifierCase) {
+        VMStatusRequest.IdentifierCase.VM_ID -> manager.stopVM(request.vmId)
+        VMStatusRequest.IdentifierCase.VM_NAME -> manager.stopVMByName(request.vmName)
+        else -> throw IllegalStateException("No vmId or vmName is provided!")
+      }
       val response = StopVMResponse.newBuilder()
-        .setSuccess(manager.stopVM(request.vmId))
+        .setSuccess(success)
         .build()
       println("Stopped VM ${request.vmId}!")
       responseObserver.onNext(response)
@@ -53,8 +58,16 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
   override fun vmStatus(request: VMStatusRequest, responseObserver: StreamObserver<VMStatusResponse>) {
     try {
       println("Getting status for VM ${request.vmId}...")
-      val session = manager.vmInfo(request.vmId)
-      val status = session?.vmInfo?.status ?: session?.sessionState
+      val status = when (request.identifierCase) {
+        VMStatusRequest.IdentifierCase.VM_ID ->
+          manager.vmInfo(request.vmId)?.let { session ->
+            session.vmInfo?.status ?: session.sessionState
+          }
+        VMStatusRequest.IdentifierCase.VM_NAME -> {
+          manager.vmStatusByName(request.vmName)
+        }
+        else -> throw IllegalStateException("No vmId or vmName is provided!")
+      }
       println("Status for VM ${request.vmId}: $status")
       val response = VMStatusResponse.newBuilder()
         .setStatus(status ?: "NotFound")
@@ -68,6 +81,45 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
         .build()
       responseObserver.onNext(response)
       responseObserver.onCompleted()
+    }
+  }
+
+  override fun scheduleVM(request: ScheduleVMRequest, responseObserver: StreamObserver<ScheduleVMResponse>) {
+    try {
+      println("Starting VM ${request.template}:${request.tag}...")
+      val index = manager.scheduleVM(
+        request.template,
+        if (request.tag.isNullOrEmpty()) null else request.tag,
+        if (request.vmName.isNullOrEmpty()) null else request.vmName,
+        if (request.startupScript.isNullOrEmpty()) null else request.startupScript,
+        request.priority
+      )
+      println("Added VM ${request.vmName} from ${request.template}:${request.tag} in queue with number $index!")
+      val response = ScheduleVMResponse.newBuilder()
+        .setQueueNumber(index.toLong())
+        .setQueueSize(manager.queueSize.toLong())
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
+    } catch (e: Exception) {
+      e.printStackTrace()
+      val response = ScheduleVMResponse.newBuilder()
+        .setErrorMessage(e.message)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
+    }
+  }
+
+  override fun getStats(request: Empty, responseObserver: StreamObserver<GetStatsResponse>) {
+    try {
+      GetStatsResponse.newBuilder()
+        .setQueueSize(manager.queueSize.toLong())
+        .setInstancesRunning(manager.communicator.listInstances().size.toLong())
+        .build()
+    } catch (e: Exception) {
+      e.printStackTrace()
+      responseObserver.onError(e)
     }
   }
 }

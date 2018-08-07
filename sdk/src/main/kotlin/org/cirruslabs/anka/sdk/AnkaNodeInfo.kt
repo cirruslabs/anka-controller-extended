@@ -12,6 +12,5 @@ data class AnkaNodeInfo(
     jsonObject.getString("ip_address"),
     jsonObject.getString("node_id"),
     jsonObject.getString("state")
-
   )
 }

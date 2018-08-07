@@ -6,12 +6,18 @@ option java_multiple_files = true;
 option java_package = "org.cirruslabs.anka.controller.grpc";
 option java_outer_classname = "ControllerProto";
 
+import "google/protobuf/empty.proto";
+
 service Controller {
   rpc StartVM (StartVMRequest) returns (StartVMResponse) {
   }
   rpc StopVM (StopVMRequest) returns (StopVMResponse) {
   }
+  rpc ScheduleVM (ScheduleVMRequest) returns (ScheduleVMResponse) {
+  }
   rpc VmStatus (VMStatusRequest) returns (VMStatusResponse) {
+  }
+  rpc GetStats (google.protobuf.Empty) returns (GetStatsResponse) {
   }
 }
 
@@ -27,8 +33,25 @@ message StartVMResponse {
   string error_message = 2;
 }
 
+message ScheduleVMRequest {
+  string template = 1;
+  string tag = 2;
+  string vm_name = 3;
+  string startup_script = 4;
+  int64 priority = 5;
+}
+
+message ScheduleVMResponse {
+  string error_message = 1;
+  int64 queue_number = 2;
+  int64 queue_size = 3;
+}
+
 message StopVMRequest {
-  string vm_id = 1;
+  oneof identifier {
+    string vm_id = 1;
+    string vm_name = 2;
+  }
 }
 
 message StopVMResponse {
@@ -37,10 +60,18 @@ message StopVMResponse {
 }
 
 message VMStatusRequest {
-  string vm_id = 1;
+  oneof identifier {
+    string vm_id = 1;
+    string vm_name = 2;
+  }
 }
 
 message VMStatusResponse {
   string status = 1;
   string error_message = 2;
+}
+
+message GetStatsResponse {
+  int64 instances_running = 1;
+  int64 queue_size = 2;
 }

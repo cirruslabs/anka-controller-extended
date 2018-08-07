@@ -8,7 +8,7 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class AnkaVMManagerTest {
-  val communicator = AnkaCommunicator("localhost", "8090")
+  val communicator = AnkaCommunicator("10.254.55.2", "80")
   val manager = AnkaVMManager(communicator)
 
   val testTemplate = "high-sierra-base"
@@ -16,13 +16,13 @@ class AnkaVMManagerTest {
   fun findTemplate(name: String): AnkaVmTemplate? =
     communicator.listTemplates().find { it.name == name }
 
-  @Test
-  fun testTemplatePresentede() {
+//  @Test
+  fun testTemplatePresented() {
     println(communicator.listTemplates())
     assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))
   }
 
-  @Test
+//  @Test
   fun testVMCreation() {
     assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))
     val instanceId = manager.startVM(testTemplate)
@@ -36,5 +36,13 @@ class AnkaVMManagerTest {
     } finally {
       assertTrue(manager.stopVM(instanceId))
     }
+  }
+
+//  @Test
+  fun testVMScheduling() {
+    assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))
+    val vmName = "test2"
+    manager.scheduleVM(testTemplate, vmName = vmName)
+    assertTrue(manager.stopVMByName(vmName))
   }
 }
