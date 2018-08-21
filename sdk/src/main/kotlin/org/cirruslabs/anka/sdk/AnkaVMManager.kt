@@ -7,10 +7,11 @@ import org.cirruslabs.anka.sdk.util.MultiOutputStream
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.util.*
+import java.util.concurrent.PriorityBlockingQueue
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
-  private val queue: PriorityQueue<AnkaVMRequest> = PriorityQueue()
+  private val queue: PriorityBlockingQueue<AnkaVMRequest> = PriorityBlockingQueue(100, Comparator<AnkaVMRequest> { o1, o2 -> -o1.compareTo(o2) })
   val queueSize: Int
     get() = queue.size
 
@@ -80,6 +81,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       it.vmInfo?.status?.toLowerCase() == "scheduling" || it.vmInfo?.status?.toLowerCase() == "scheduled"
     }
     if (instanceWaitingScheduling != null) {
+      println("${instanceWaitingScheduling.vmId} vm is already waiting scheduling!")
       return false
     }
     val request = synchronized(queue) {

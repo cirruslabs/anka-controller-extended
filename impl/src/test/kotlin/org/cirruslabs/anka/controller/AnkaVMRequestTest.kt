@@ -8,16 +8,18 @@ import kotlin.test.assertEquals
 class AnkaVMRequestTest {
   @Test
   fun priority() {
-    val queue = PriorityBlockingQueue(100, Comparator<AnkaVMRequest> { o1, o2 -> o2.compareTo(o1) })
-    queue.add(AnkaVMRequest("base", vmName = "1", priority = 101))
-    queue.add(AnkaVMRequest("base", vmName = "2", priority = 102))
+    val queue = PriorityBlockingQueue(100, Comparator<AnkaVMRequest> { o1, o2 -> -o1.compareTo(o2) })
+    queue.add(AnkaVMRequest("base", vmName = "1", priority = 100, creationTimestamp = 1))
+    queue.add(AnkaVMRequest("base", vmName = "2", priority = 100, creationTimestamp = 2))
     queue.add(AnkaVMRequest("base", vmName = "3", priority = 200))
     queue.add(AnkaVMRequest("base", vmName = "4", priority = 300))
-    queue.add(AnkaVMRequest("base", vmName = "5", priority = 105))
-    assertEquals("4", queue.poll().vmName)
-    assertEquals("3", queue.poll().vmName)
-    assertEquals("5", queue.poll().vmName)
-    assertEquals("2", queue.poll().vmName)
-    assertEquals("1", queue.poll().vmName)
+    queue.add(AnkaVMRequest("base", vmName = "5", priority = 100, creationTimestamp = 5))
+    assertEquals(listOf("4", "3", "1", "2", "5"), queue.map { it.vmName })
+    assertEquals("4", queue.remove().vmName)
+    assertEquals("3", queue.remove().vmName)
+    assertEquals("1", queue.remove().vmName)
+    assertEquals("2", queue.remove().vmName)
+    assertEquals("5", queue.remove().vmName)
+
   }
 }
