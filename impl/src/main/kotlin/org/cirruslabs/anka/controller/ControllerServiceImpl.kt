@@ -33,7 +33,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
 
   override fun stopVM(request: StopVMRequest, responseObserver: StreamObserver<StopVMResponse>) {
     try {
-      println("Stopping VM ${request.vmId}...")
+      println("Stopping VM ${request.vmId}${request.vmName}...")
       val success = when (request.identifierCase) {
         VMStatusRequest.IdentifierCase.VM_ID -> manager.stopVM(request.vmId)
         VMStatusRequest.IdentifierCase.VM_NAME -> manager.stopVMByName(request.vmName)
@@ -57,7 +57,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
 
   override fun vmStatus(request: VMStatusRequest, responseObserver: StreamObserver<VMStatusResponse>) {
     try {
-      println("Getting status for VM ${request.vmId}...")
+      println("Getting status for VM ${request.vmId}${request.vmName}...")
       val status = when (request.identifierCase) {
         VMStatusRequest.IdentifierCase.VM_ID ->
           manager.vmInfo(request.vmId)?.let { session ->
@@ -68,7 +68,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
         }
         else -> throw IllegalStateException("No vmId or vmName is provided!")
       }
-      println("Status for VM ${request.vmId}: $status")
+      println("Status for VM ${request.vmId}${request.vmName}: $status")
       val response = VMStatusResponse.newBuilder()
         .setStatus(status ?: "NotFound")
         .build()
@@ -113,9 +113,13 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
 
   override fun getStats(request: Empty, responseObserver: StreamObserver<GetStatsResponse>) {
     try {
+      val instances = manager.communicator.listInstances()
+      val nodes = manager.communicator.listNodes()
       GetStatsResponse.newBuilder()
         .setQueueSize(manager.queueSize.toLong())
-        .setInstancesRunning(manager.communicator.listInstances().size.toLong())
+        .setInstancesSize(instances.size.toLong())
+        .setActiveNodesSize(nodes.count { it.state?.toLowerCase() == "active" }.toLong())
+        .setOfflineNodesSize(nodes.count { it.state?.toLowerCase() == "offline" }.toLong())
         .build()
     } catch (e: Exception) {
       e.printStackTrace()

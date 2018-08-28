@@ -1,6 +1,11 @@
 {
   "libraries": [
     {
+      "group": "com.google.guava",
+      "name": "guava",
+      "version": "24.0-jre"
+    },
+    {
       "group": "com.google.protobuf",
       "name": "protobuf-gradle-plugin",
       "version": "0.8.5"

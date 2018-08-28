@@ -72,6 +72,8 @@ message VMStatusResponse {
 }
 
 message GetStatsResponse {
-  int64 instances_running = 1;
+  int64 instances_size = 1;
   int64 queue_size = 2;
+  int64 active_nodes_size = 3;
+  int64 offline_nodes_size = 4;
 }
