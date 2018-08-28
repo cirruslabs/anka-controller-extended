@@ -115,12 +115,14 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
     try {
       val instances = manager.communicator.listInstances()
       val nodes = manager.communicator.listNodes()
-      GetStatsResponse.newBuilder()
+      val response = GetStatsResponse.newBuilder()
         .setQueueSize(manager.queueSize.toLong())
         .setInstancesSize(instances.size.toLong())
         .setActiveNodesSize(nodes.count { it.state?.toLowerCase() == "active" }.toLong())
         .setOfflineNodesSize(nodes.count { it.state?.toLowerCase() == "offline" }.toLong())
         .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
     } catch (e: Exception) {
       e.printStackTrace()
       responseObserver.onError(e)
