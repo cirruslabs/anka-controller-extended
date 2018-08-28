@@ -1,10 +1,10 @@
-FROM gradle:jdk8 as builder
+FROM gradle:4.8-jdk8 as builder
 
 USER root
 WORKDIR /tmp/build
 ADD . /tmp/build/
 
-RUN gradle clean :impl:shadowJar --stacktrace --no-daemon
+RUN ./gradlew clean :impl:shadowJar --stacktrace --no-daemon
 
 FROM openjdk:8
 
