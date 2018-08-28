@@ -70,7 +70,11 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   }
 
   fun vmStatusByName(name: String): String {
-    queue.find { it.vmName == name } ?: return "Scheduling"
+    println("Check $name VM status...")
+    if (queue.find { it.vmName == name } != null) {
+      println("VM $name is still in the queue...")
+      return "Scheduling"
+    }
     return communicator.listInstances().find {
       it.vmInfo?.name == name
     }?.vmInfo?.status ?: throw AnkaException("VM with name $name not found!")
