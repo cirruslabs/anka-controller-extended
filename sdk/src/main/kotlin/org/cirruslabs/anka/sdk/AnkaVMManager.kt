@@ -75,9 +75,19 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("VM $name is still in the queue...")
       return "Scheduling"
     }
-    return communicator.listInstances().find {
-      it.vmInfo?.name == name
-    }?.vmInfo?.status ?: throw AnkaException("VM with name $name not found!")
+    val instanceId = instanceIdCache.getIfPresent(name)
+
+    if (instanceId != null) {
+      println("Got instance id $instanceId for $name vm from cache!")
+      return communicator.listInstances().find {
+        it.id == instanceId
+      }?.vmInfo?.status ?: throw AnkaException("VM with name $name not found!")
+    } else {
+      println("Tried to find instance status for $name vm via API: $instanceId")
+      return communicator.listInstances().find {
+        it.vmInfo?.name == name
+      }?.vmInfo?.status ?: throw AnkaException("VM with name $name not found!")
+    }
   }
 
   fun execute(vm: AnkaVm, script: String): String {
