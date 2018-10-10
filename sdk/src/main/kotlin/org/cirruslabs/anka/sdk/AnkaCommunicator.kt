@@ -254,7 +254,6 @@ constructor(private val host: String, private val port: String) {
       throw AnkaException(e)
     } finally {
       request.releaseConnection()
-      httpClient.close()
     }
     return null
   }
