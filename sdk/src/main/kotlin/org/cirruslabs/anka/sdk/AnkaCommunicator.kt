@@ -21,6 +21,8 @@ class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private var scheme: String? = null
 
+  val httpClient = HttpClientBuilder.create().build()
+
   init {
     this.scheme = "https"
     try {
@@ -215,22 +217,18 @@ constructor(private val host: String, private val port: String) {
   @Throws(IOException::class, AnkaException::class)
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
     println("Making $method request to $url with body: $requestBody")
-    val httpClient = HttpClientBuilder.create().build()
-    val request: HttpRequestBase
-    try {
-      request = when (method) {
-        AnkaCommunicator.RequestMethod.POST -> {
-          val postRequest = HttpPost(url)
-          setBody(postRequest, requestBody!!)
-        }
-        AnkaCommunicator.RequestMethod.DELETE -> {
-          val delRequest = HttpDeleteWithBody(url)
-          setBody(delRequest, requestBody!!)
-        }
-        AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
-        else -> HttpGet(url)
+    val request: HttpRequestBase  = when (method) {
+      AnkaCommunicator.RequestMethod.POST -> {
+        val postRequest = HttpPost(url)
+        setBody(postRequest, requestBody!!)
       }
-
+      AnkaCommunicator.RequestMethod.DELETE -> {
+        val delRequest = HttpDeleteWithBody(url)
+        setBody(delRequest, requestBody!!)
+      }
+      AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
+    }
+    try {
       val response = httpClient.execute(request)
       val responseCode = response.statusLine.statusCode
       if (responseCode != 200) {
@@ -255,6 +253,7 @@ constructor(private val host: String, private val port: String) {
       e.printStackTrace()
       throw AnkaException(e)
     } finally {
+      request.releaseConnection()
       httpClient.close()
     }
     return null
