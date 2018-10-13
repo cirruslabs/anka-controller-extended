@@ -19,9 +19,6 @@ class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private var scheme: String? = null
 
-  val httpClient = HttpClientBuilder.create()
-    .build()
-
   init {
     this.scheme = "https"
     try {
@@ -215,6 +212,7 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(IOException::class, AnkaException::class)
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
+    val httpClient = HttpClientBuilder.create().build()
     println("Making $method request to $url with body: $requestBody")
     val request: HttpRequestBase  = when (method) {
       AnkaCommunicator.RequestMethod.POST -> {
@@ -256,6 +254,7 @@ constructor(private val host: String, private val port: String) {
     } finally {
       request.releaseConnection()
       HttpClientUtils.closeQuietly(response)
+      HttpClientUtils.closeQuietly(httpClient)
     }
     return null
   }
