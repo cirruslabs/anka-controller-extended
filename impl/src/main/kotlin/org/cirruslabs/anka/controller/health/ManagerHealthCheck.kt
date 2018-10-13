@@ -14,6 +14,8 @@ class ManagerHealthCheck(val manager: AnkaVMManager): HealthCheck() {
       }
     } catch (e: Exception) {
       Result.unhealthy(e)
+    }.also {
+      println("Health check: ${it.message}")
     }
   }
 }
