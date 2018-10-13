@@ -1,5 +1,6 @@
 package org.cirruslabs.anka.sdk
 
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
@@ -14,6 +15,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
 import java.net.URI
+import java.time.Duration
 import java.util.*
 import javax.net.ssl.SSLException
 
@@ -21,7 +23,16 @@ class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private var scheme: String? = null
 
-  val httpClient = HttpClientBuilder.create().build()
+  private val requestTimeout = Duration.ofMinutes(1)
+  private val requestConfig = RequestConfig.custom()
+    .setConnectTimeout(requestTimeout.toMillis().toInt())
+    .setConnectionRequestTimeout(requestTimeout.toMillis().toInt())
+    .setSocketTimeout(requestTimeout.toMillis().toInt())
+    .build()
+
+  val httpClient = HttpClientBuilder.create()
+    .setDefaultRequestConfig(requestConfig)
+    .build()
 
   init {
     this.scheme = "https"
@@ -238,9 +249,9 @@ constructor(private val host: String, private val port: String) {
       val entity = response.entity
       if (entity != null) {
         val rd = BufferedReader(InputStreamReader(entity.content))
-        val response = rd.readText()
-        println(response)
-        return JSONObject(response)
+        val responseContent = rd.readText()
+        println("Response for $url with body $requestBody: $responseContent")
+        return JSONObject(responseContent)
       }
     } catch (e: HttpHostConnectException) {
       throw AnkaException(e)
