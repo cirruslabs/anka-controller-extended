@@ -1,10 +1,8 @@
 package org.cirruslabs.anka.sdk
 
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpRequestBase
+import org.apache.http.client.methods.*
+import org.apache.http.client.utils.HttpClientUtils
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
@@ -239,8 +237,10 @@ constructor(private val host: String, private val port: String) {
       }
       AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
     }
+    var response: CloseableHttpResponse? = null
+
     try {
-      val response = httpClient.execute(request)
+      response = httpClient.execute(request)
       val responseCode = response.statusLine.statusCode
       if (responseCode != 200) {
         println(response.toString())
@@ -265,6 +265,7 @@ constructor(private val host: String, private val port: String) {
       throw AnkaException(e)
     } finally {
       request.releaseConnection()
+      HttpClientUtils.closeQuietly(response)
     }
     return null
   }
