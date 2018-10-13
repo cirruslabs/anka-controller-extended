@@ -21,7 +21,7 @@ class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private var scheme: String? = null
 
-  private val requestTimeout = Duration.ofMinutes(1)
+  private val requestTimeout = Duration.ofMinutes(10)
   private val requestConfig = RequestConfig.custom()
     .setConnectTimeout(requestTimeout.toMillis().toInt())
     .setConnectionRequestTimeout(requestTimeout.toMillis().toInt())
