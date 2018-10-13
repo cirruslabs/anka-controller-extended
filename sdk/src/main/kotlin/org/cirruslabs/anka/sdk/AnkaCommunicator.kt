@@ -1,6 +1,5 @@
 package org.cirruslabs.anka.sdk
 
-import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.*
 import org.apache.http.client.utils.HttpClientUtils
 import org.apache.http.conn.HttpHostConnectException
@@ -13,7 +12,6 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
 import java.net.URI
-import java.time.Duration
 import java.util.*
 import javax.net.ssl.SSLException
 
@@ -21,15 +19,7 @@ class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private var scheme: String? = null
 
-  private val requestTimeout = Duration.ofMinutes(10)
-  private val requestConfig = RequestConfig.custom()
-    .setConnectTimeout(requestTimeout.toMillis().toInt())
-    .setConnectionRequestTimeout(requestTimeout.toMillis().toInt())
-    .setSocketTimeout(requestTimeout.toMillis().toInt())
-    .build()
-
   val httpClient = HttpClientBuilder.create()
-    .setDefaultRequestConfig(requestConfig)
     .build()
 
   init {
