@@ -14,7 +14,9 @@ import java.util.concurrent.PriorityBlockingQueue
 class AnkaVMManager(val communicator: AnkaCommunicator) {
   private val queue: PriorityBlockingQueue<AnkaVMRequest> = PriorityBlockingQueue(100, Comparator<AnkaVMRequest> { o1, o2 -> -o1.compareTo(o2) })
 
-  private val instanceIdCache = CacheBuilder.newBuilder().maximumSize(10000).build<String, String>()
+  private val instanceIdCache = CacheBuilder.newBuilder()
+    .maximumSize(10000)
+    .build<String, String>()
 
   val queueSize: Int
     get() = queue.size
@@ -48,6 +50,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     if (instanceId != null) {
       println("Got instance id $instanceId for $name vm from cache!")
     } else {
+      println("Trying to find instance for $name vm via API: $instanceId...")
       instanceId = communicator.listInstances().find { it.vmInfo?.name == name }?.id
       println("Tried to find instance for $name vm via API: $instanceId")
     }
