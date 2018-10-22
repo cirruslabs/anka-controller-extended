@@ -1,5 +1,6 @@
 package org.cirruslabs.anka.sdk
 
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.*
 import org.apache.http.client.utils.HttpClientUtils
 import org.apache.http.conn.HttpHostConnectException
@@ -12,11 +13,14 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
 import java.net.URI
+import java.time.Duration
 import java.util.*
 import javax.net.ssl.SSLException
 
 class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
+  private val API_TIMEOUT = Duration.ofMinutes(2)
+
   private var scheme: String? = null
 
   init {
@@ -212,7 +216,14 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(IOException::class, AnkaException::class)
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
-    val httpClient = HttpClientBuilder.create().build()
+    val httpClient = HttpClientBuilder.create()
+      .setDefaultRequestConfig(
+        RequestConfig.custom()
+          .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
+          .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
+          .build()
+      )
+      .build()
     println("Making $method request to $url with body: $requestBody")
     val request: HttpRequestBase  = when (method) {
       AnkaCommunicator.RequestMethod.POST -> {
