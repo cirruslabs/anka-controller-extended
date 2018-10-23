@@ -55,7 +55,10 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Tried to find instance for $name vm via API: $instanceId")
     }
 
-    instanceId ?: return false
+    if (instanceId == null) {
+      System.err.println("Failed to find instance for $instanceId/$name!")
+      return true
+    }
 
     instanceIdCache.invalidate(name)
     println("Stopping instance $instanceId for vm $name!")
