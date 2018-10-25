@@ -84,6 +84,25 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
     }
   }
 
+  override fun batchedVmStatus(request: BatchedVMStatusRequest, responseObserver: StreamObserver<BatchedVMStatusResponse>) {
+    try {
+      println("Getting status for VMs ${request.vmNamesList}")
+      val statuses = manager.vmStatusByNames(request.vmNamesList.toSet())
+      val response = BatchedVMStatusResponse.newBuilder()
+        .putAllStatuses(statuses)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
+    } catch (e: Exception) {
+      e.printStackTrace()
+      val response = BatchedVMStatusResponse.newBuilder()
+        .setErrorMessage(e.message)
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
+    }
+  }
+
   override fun scheduleVM(request: ScheduleVMRequest, responseObserver: StreamObserver<ScheduleVMResponse>) {
     try {
       println("Starting VM ${request.template}:${request.tag}...")

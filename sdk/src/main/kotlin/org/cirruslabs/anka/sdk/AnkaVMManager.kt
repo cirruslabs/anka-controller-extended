@@ -100,6 +100,27 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     }
   }
 
+  fun vmStatusByNames(vmNames: Set<String>): Map<String, String> {
+    val statusesFromQueue = queue.mapNotNull { it.vmName }.mapNotNull { vmName ->
+      if (vmNames.contains(vmName)) Pair(vmName, "Scheduling") else null
+    }.toMap()
+    if (statusesFromQueue.keys.containsAll(vmNames)) {
+      return statusesFromQueue
+    }
+    val statusesFromApi = communicator.listInstances().mapNotNull { session ->
+      val instanceVmName = session.vmInfo?.name
+      when {
+        instanceVmName == null -> null
+        vmNames.contains(instanceVmName) -> {
+          val status = session.vmInfo?.status ?: session.sessionState
+          Pair(instanceVmName, status)
+        }
+        else -> null
+      }
+    }.toMap()
+    return statusesFromQueue + statusesFromApi
+  }
+
   fun execute(vm: AnkaVm, script: String): String {
     val shell = SshByPassword(vm.connectionIp, vm.connectionPort, "anka", "admin")
     // todo: investigate how to do fire and forget
