@@ -17,6 +17,11 @@ class AnkaVMManagerTest {
     communicator.listTemplates().find { it.name == name }
 
 //  @Test
+  fun testCapacity() {
+    println(communicator.listNodes())
+  }
+
+//  @Test
   fun testTemplatePresented() {
     println(communicator.listTemplates())
     assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))

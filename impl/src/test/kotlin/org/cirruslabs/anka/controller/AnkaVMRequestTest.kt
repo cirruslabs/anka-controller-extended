@@ -2,6 +2,7 @@ package org.cirruslabs.anka.controller
 
 import org.cirruslabs.anka.sdk.AnkaVMRequest
 import org.junit.Test
+import java.util.Comparator
 import java.util.concurrent.PriorityBlockingQueue
 import kotlin.test.assertEquals
 

@@ -149,14 +149,11 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Nothing to schedule...")
       return false
     }
-    val instanceWaitingScheduling = communicator.listInstances().find {
-      it.vmInfo?.status?.toLowerCase() == "scheduling" ||
-        it.vmInfo?.status?.toLowerCase() == "scheduled" ||
-        it.sessionState?.toLowerCase() == "scheduling" ||
-        it.sessionState?.toLowerCase() == "scheduled"
+    val clusterHasCapacity = communicator.listNodes().any {
+      it.hasCapacity
     }
-    if (instanceWaitingScheduling != null) {
-      println("${instanceWaitingScheduling.vmId} vm is already waiting scheduling!")
+    if (!clusterHasCapacity) {
+      println("Cluster doesn't have capacity")
       return false
     }
     val request = synchronized(queue) {
