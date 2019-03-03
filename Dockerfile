@@ -1,4 +1,4 @@
-FROM gradle:4.8-jdk8 as builder
+FROM gradle:5.2-jdk11 as builder
 
 USER root
 WORKDIR /tmp/build
@@ -6,7 +6,7 @@ ADD . /tmp/build/
 
 RUN ./gradlew clean :impl:shadowJar --stacktrace --no-daemon
 
-FROM openjdk:8
+FROM openjdk:11
 
 MAINTAINER Fedor fedor.korotkov@gmail.com;
 
