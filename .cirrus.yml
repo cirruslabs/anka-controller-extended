@@ -1,5 +1,5 @@
 container:
-  image: gradle:4.8-jdk8
+  image: gradle:5.2-jdk11
 
 env:
   BINTRAY_API_KEY: ENCRYPTED[ae657ac6e6bd155cd5fb4edf9875f57577a74f18aee69a57ef2a32cbb9d19131907a3d223cca94be880aa8c96a579166]
