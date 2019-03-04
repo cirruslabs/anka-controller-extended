@@ -143,6 +143,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     return Math.max(0, queue.indexOf(vmRequest) + 1)
   }
 
+  @Synchronized
   fun tryToSchedule(): Boolean {
     println("Trying to schedule a VM...")
     if (queue.isEmpty()) {
@@ -156,12 +157,10 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Cluster doesn't have capacity")
       return false
     }
-    val request = synchronized(queue) {
-      try {
-        queue.remove()
-      } catch (e: Exception) {
-        null
-      }
+    val request = try {
+      queue.remove()
+    } catch (e: Exception) {
+      null
     }
     if (request == null) {
       println("No requests to schedule!")
