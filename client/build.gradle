@@ -84,6 +84,8 @@ dependencies {
   api libraries['io.grpc:grpc-core']
   api libraries['io.grpc:grpc-protobuf']
   api libraries['io.grpc:grpc-stub']
+  
+  implementation libraries['javax.annotation:javax.annotation-api']
 
   testImplementation libraries['junit:junit']
   testImplementation libraries['org.jetbrains.kotlin:kotlin-test-junit']

@@ -1,6 +1,6 @@
 package org.cirruslabs.anka.controller
 
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.cirruslabs.anka.sdk.AnkaCommunicator
 import org.cirruslabs.anka.sdk.AnkaVMManager
 import org.cirruslabs.anka.sdk.AnkaVmTemplate

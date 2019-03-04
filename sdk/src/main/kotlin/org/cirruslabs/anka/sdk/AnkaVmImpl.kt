@@ -1,6 +1,6 @@
 package org.cirruslabs.anka.sdk
 
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.delay
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import java.io.IOException
 import java.time.Duration
