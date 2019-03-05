@@ -58,37 +58,37 @@
     {
       "group": "io.grpc",
       "name": "grpc-auth",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.grpc",
       "name": "grpc-core",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.grpc",
       "name": "grpc-context",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.grpc",
       "name": "grpc-netty",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.grpc",
       "name": "grpc-protobuf",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.grpc",
       "name": "grpc-stub",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.grpc",
       "name": "protoc-gen-grpc-java",
-      "version": "1.19.0"
+      "version": "1.18.0"
     },
     {
       "group": "io.netty",
