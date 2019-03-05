@@ -116,6 +116,11 @@
       "version": "4.5.7"
     },
     {
+      "group": "org.glassfish.jaxb",
+      "name": "jaxb-runtime",
+      "version": "2.3.2"
+    },
+    {
       "group": "org.json",
       "name": "json",
       "version": "20180813"
