@@ -47,6 +47,7 @@ dependencies {
   implementation libraries['io.grpc:grpc-protobuf']
   implementation libraries['io.grpc:grpc-stub']
   implementation libraries['io.netty:netty-tcnative-boringssl-static']
+  implementation libraries['javax.xml.bind:jaxb-api']
 
   testImplementation libraries['junit:junit']
   testImplementation libraries['org.jetbrains.kotlin:kotlin-test-junit']
