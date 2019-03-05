@@ -35,8 +35,8 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
     try {
       println("Stopping VM ${request.vmId}${request.vmName}...")
       val success = when (request.identifierCase) {
-        VMStatusRequest.IdentifierCase.VM_ID -> manager.stopVM(request.vmId)
-        VMStatusRequest.IdentifierCase.VM_NAME -> manager.stopVMByName(request.vmName)
+        StopVMRequest.IdentifierCase.VM_ID -> manager.stopVM(request.vmId)
+        StopVMRequest.IdentifierCase.VM_NAME -> manager.stopVMByName(request.vmName)
         else -> throw IllegalStateException("No vmId or vmName is provided!")
       }
       val response = StopVMResponse.newBuilder()
