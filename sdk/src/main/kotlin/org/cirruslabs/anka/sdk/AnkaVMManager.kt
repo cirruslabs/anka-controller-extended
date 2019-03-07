@@ -139,11 +139,9 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   fun scheduleVM(templateName: String, tag: String? = null, vmName: String? = null, startupScript: String? = null, priority: Long = 0): Int {
     val vmRequest = AnkaVMRequest(templateName, tag, vmName, startupScript, priority)
     queue.offer(vmRequest)
-    tryToSchedule()
     return Math.max(0, queue.indexOf(vmRequest) + 1)
   }
 
-  @Synchronized
   fun tryToSchedule(): Boolean {
     println("Trying to schedule a VM...")
     if (queue.isEmpty()) {
