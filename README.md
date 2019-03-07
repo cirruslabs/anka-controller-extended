@@ -56,6 +56,14 @@ gcloud compute firewall-rules create allow-grpc \
     --allow tcp:8239 --target-tags anka-controller
 ```
 
+### Testing locally
+
+```bash
+docker run --privileged \
+  --env-file $PATH_TO_ENV_FILE \
+  docker.io/cirrusci/anka-controller-extended:latest
+```
+
 ### Published Kotlin Libraries
 
 This repository also provides two Kotlin libraries that can be integrated in other projects. To use them please add Cirrus
