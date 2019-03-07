@@ -10,7 +10,6 @@ import org.cirruslabs.anka.controller.auth.AccessTokenServerInterceptor
 import org.cirruslabs.anka.controller.config.AuthApplicationConfiguration
 import org.cirruslabs.anka.controller.health.FutureHealthCheck
 import org.cirruslabs.anka.controller.health.ManagerHealthCheck
-import org.cirruslabs.anka.controller.health.ScheduleHealthCheck
 import org.cirruslabs.anka.sdk.AnkaVMManager
 import java.util.*
 import java.util.concurrent.Executors
@@ -51,7 +50,6 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
     // available at /healthcheck
     val healthCheck = ManagerHealthCheck(vmManager)
     environment.healthChecks().register("vm-manager", healthCheck)
-    environment.healthChecks().register("scheduling", ScheduleHealthCheck(vmManager))
 
     println("Started GRPC server on ${grpcConfig.port} port...")
     println("Current health: ${healthCheck.execute()}")
