@@ -6,7 +6,6 @@ import org.apache.http.client.utils.HttpClientUtils
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -21,16 +20,6 @@ import javax.net.ssl.SSLException
 class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private val API_TIMEOUT = Duration.ofMinutes(2)
-
-  private val httpClient = HttpClientBuilder.create()
-    .setConnectionManager(PoolingHttpClientConnectionManager())
-    .setDefaultRequestConfig(
-      RequestConfig.custom()
-        .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
-        .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
-        .build()
-    )
-    .build()
 
   private var scheme: String? = null
 
@@ -227,6 +216,14 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(IOException::class, AnkaException::class)
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
+    val httpClient = HttpClientBuilder.create()
+      .setDefaultRequestConfig(
+        RequestConfig.custom()
+          .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
+          .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
+          .build()
+      )
+      .build()
     println("Making $method request to $url with body: $requestBody")
     val request: HttpRequestBase  = when (method) {
       AnkaCommunicator.RequestMethod.POST -> {
@@ -268,6 +265,7 @@ constructor(private val host: String, private val port: String) {
     } finally {
       request.releaseConnection()
       HttpClientUtils.closeQuietly(response)
+      HttpClientUtils.closeQuietly(httpClient)
     }
     return null
   }
