@@ -105,7 +105,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
 
   override fun scheduleVM(request: ScheduleVMRequest, responseObserver: StreamObserver<ScheduleVMResponse>) {
     try {
-      println("Starting VM ${request.template}:${request.tag}...")
+      println("Scheduling VM ${request.vmName} from ${request.template}:${request.tag}...")
       val index = manager.scheduleVM(
         request.template,
         if (request.tag.isNullOrEmpty()) null else request.tag,
