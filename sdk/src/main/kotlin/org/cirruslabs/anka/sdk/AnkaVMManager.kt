@@ -163,7 +163,12 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("No requests to schedule!")
       return false
     }
-    startVM(request.templateName, request.tag, request.vmName, request.startupScript)
+    try {
+      startVM(request.templateName, request.tag, request.vmName, request.startupScript)
+    } catch (e: Exception) {
+      println("Failed to schedule VM ${request.vmName}: ${e.message}")
+      queue.offer(request)
+    }
     return true
   }
 }
