@@ -221,6 +221,7 @@ constructor(private val host: String, private val port: String) {
         RequestConfig.custom()
           .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
           .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
+          .setSocketTimeout(API_TIMEOUT.toMillis().toInt())
           .build()
       )
       .build()
