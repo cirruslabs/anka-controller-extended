@@ -7,12 +7,10 @@ import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import org.cirruslabs.anka.sdk.util.MultiOutputStream
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
-import java.util.*
-import java.util.concurrent.PriorityBlockingQueue
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
-  private val queue: PriorityBlockingQueue<AnkaVMRequest> = PriorityBlockingQueue(100, Comparator<AnkaVMRequest> { o1, o2 -> -o1.compareTo(o2) })
+  private val queue = RequestQueue()
 
   private val instanceIdCache = CacheBuilder.newBuilder()
     .maximumSize(10000)
@@ -40,7 +38,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
 
   fun stopVMByName(name: String): Boolean {
     println("Stopping vm $name")
-    val queuedRequest = queue.find { it.vmName == name }
+    val queuedRequest = queue.findByVMName(name)
     if (queuedRequest != null) {
       println("Removed vm $name from the queue")
       return queue.remove(queuedRequest)
@@ -77,7 +75,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
 
   fun vmStatusByName(name: String): String {
     println("Check $name VM status...")
-    if (queue.find { it.vmName == name } != null) {
+    if (queue.findByVMName(name) != null) {
       println("VM $name is still in the queue...")
       return "Scheduling"
     }
@@ -101,7 +99,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   }
 
   fun vmStatusByNames(vmNames: Set<String>): Map<String, String> {
-    val statusesFromQueue = queue.mapNotNull { it.vmName }.mapNotNull { vmName ->
+    val statusesFromQueue = queue.vmNames.toSet().mapNotNull { vmName ->
       if (vmNames.contains(vmName)) Pair(vmName, "Scheduling") else null
     }.toMap()
     if (statusesFromQueue.keys.containsAll(vmNames)) {
@@ -138,13 +136,12 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
 
   fun scheduleVM(templateName: String, tag: String? = null, vmName: String? = null, startupScript: String? = null, priority: Long = 0): Int {
     val vmRequest = AnkaVMRequest(templateName, tag, vmName, startupScript, priority)
-    queue.offer(vmRequest)
-    return Math.max(0, queue.indexOf(vmRequest) + 1)
+    return queue.offer(vmRequest)
   }
 
   fun tryToSchedule(): Boolean {
     println("Trying to schedule a VM...")
-    if (queue.isEmpty()) {
+    if (queue.isEmpty) {
       println("Nothing to schedule...")
       return false
     }
@@ -155,11 +152,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Cluster doesn't have capacity")
       return false
     }
-    val request = try {
-      queue.remove()
-    } catch (e: Exception) {
-      null
-    }
+    val request = queue.poll()
     if (request == null) {
       println("No requests to schedule!")
       return false

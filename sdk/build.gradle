@@ -50,6 +50,9 @@ dependencies {
   implementation libraries['org.jetbrains.kotlinx:kotlinx-coroutines-jdk8']
   implementation libraries['org.apache.httpcomponents:httpclient']
   implementation libraries['org.json:json']
+
+  testImplementation libraries['junit:junit']
+  testImplementation libraries['org.jetbrains.kotlin:kotlin-test-junit']
 }
 
 kotlin {
