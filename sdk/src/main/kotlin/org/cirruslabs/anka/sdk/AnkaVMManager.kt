@@ -139,19 +139,25 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     return queue.offer(vmRequest)
   }
 
-  fun tryToSchedule(): Boolean {
+  fun tryToScheduleRemainingVMs() {
     println("Trying to schedule a VM...")
     if (queue.isEmpty) {
       println("Nothing to schedule...")
-      return false
+      return
     }
-    val clusterHasCapacity = communicator.listNodes().any {
-      it.hasCapacity
+    val clusterRemainingCapacity = communicator.listNodes().sumBy {
+      it.remainingCapacity
     }
-    if (!clusterHasCapacity) {
+    if (clusterRemainingCapacity == 0) {
       println("Cluster doesn't have capacity")
-      return false
+      return
     }
+    repeat(clusterRemainingCapacity) {
+      if (!tryToScheduleSingleVM()) return@repeat
+    }
+  }
+
+  private fun tryToScheduleSingleVM(): Boolean {
     val request = queue.poll()
     if (request == null) {
       println("No requests to schedule!")

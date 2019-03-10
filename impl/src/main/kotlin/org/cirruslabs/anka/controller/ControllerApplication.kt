@@ -58,9 +58,8 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
     val tryToSchedule = scheduledExecutorService.scheduleWithFixedDelay(
       {
         try {
-          while(vmManager.tryToSchedule()) {
-            println("Scheduled!")
-          }
+          vmManager.tryToScheduleRemainingVMs()
+          println("Scheduled!")
         } catch (e: Throwable) {
           System.err.println("Failed to schedule: ${e.message}")
           e.printStackTrace(System.err)

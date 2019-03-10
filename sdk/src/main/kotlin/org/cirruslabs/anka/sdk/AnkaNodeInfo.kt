@@ -1,6 +1,7 @@
 package org.cirruslabs.anka.sdk
 
 import org.json.JSONObject
+import kotlin.math.max
 
 data class AnkaNodeInfo(
   val ipAddress: String,
@@ -11,6 +12,9 @@ data class AnkaNodeInfo(
 ) {
   val hasCapacity: Boolean
     get() = vmCount < capacity
+
+  val remainingCapacity: Int
+    get() = max(0, capacity - vmCount)
 
   constructor(jsonObject: JSONObject) : this(
     jsonObject.getString("ip_address"),
