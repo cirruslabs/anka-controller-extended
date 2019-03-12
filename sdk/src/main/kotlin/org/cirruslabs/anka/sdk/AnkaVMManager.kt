@@ -105,7 +105,9 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     if (statusesFromQueue.keys.containsAll(vmNames)) {
       return statusesFromQueue
     }
-    val statusesFromApi = communicator.listInstances().mapNotNull { session ->
+
+    val instances = communicator.listInstances()
+    val statusesFromApiByName = instances.mapNotNull { session ->
       val instanceVmName = session.vmInfo?.name
       when {
         instanceVmName == null -> null
@@ -116,7 +118,16 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
         else -> null
       }
     }.toMap()
-    return statusesFromQueue + statusesFromApi
+
+    val statusesFromApiByVmId = vmNames.mapNotNull { instanceVmName ->
+      instanceIdCache.getIfPresent(instanceVmName)?.let { instanceId ->
+        instances.find { it.vmId == instanceId }?.let { session ->
+          val status = session.vmInfo?.status ?: session.sessionState
+          Pair(instanceVmName, status)
+        }
+      }
+    }.toMap()
+    return statusesFromQueue + statusesFromApiByName + statusesFromApiByVmId
   }
 
   fun execute(vm: AnkaVm, script: String): String {
