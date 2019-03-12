@@ -145,14 +145,15 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Nothing to schedule...")
       return
     }
+    val schedulingInstances = communicator.listInstances().count { it.sessionState == "Scheduling" }
     val clusterRemainingCapacity = communicator.listNodes().sumBy {
       it.remainingCapacity
     }
-    if (clusterRemainingCapacity == 0) {
+    println("Cluster remaining capacity is $clusterRemainingCapacity and there are $schedulingInstances scheduling instances...")
+    if ((clusterRemainingCapacity - schedulingInstances) <= 0) {
       println("Cluster doesn't have capacity")
       return
     }
-    println("Cluster remaining capacity: $clusterRemainingCapacity")
     repeat(clusterRemainingCapacity) {
       if (!tryToScheduleSingleVM()) return@repeat
     }
