@@ -152,6 +152,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Cluster doesn't have capacity")
       return
     }
+    println("Cluster remaining capacity: $clusterRemainingCapacity")
     repeat(clusterRemainingCapacity) {
       if (!tryToScheduleSingleVM()) return@repeat
     }
