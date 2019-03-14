@@ -16,19 +16,29 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     .maximumSize(10000)
     .build<String, String>()
 
+  private val templateIdCache = CacheBuilder.newBuilder()
+    .maximumSize(10000)
+    .build<String, String>()
+
   val queueSize: Int
     get() = queue.size
 
   fun startVM(templateName: String, tag: String? = null, vmName: String? = null, startupScript: String? = null): String {
     println("Starting VM $templateName:$tag with name $vmName...")
-    val template = (communicator.listTemplates().find { it.name == templateName }
-      ?: throw AnkaException("Template with name $templateName not found!"))
-    val instanceId = communicator.startVm(template.id, tag, vmName, startupScript)
+    val templateId = findTemplateByName(templateName)
+    val instanceId = communicator.startVm(templateId, tag, vmName, startupScript)
     println("Started VM $templateName:$tag with name $vmName! Instance id is $instanceId")
     if (vmName != null) {
       instanceIdCache.put(vmName, instanceId)
     }
     return instanceId
+  }
+
+  private fun findTemplateByName(templateName: String): String {
+    return templateIdCache.get(templateName) {
+      (communicator.listTemplates().find { it.name == templateName }?.id
+        ?: throw AnkaException("Template with name $templateName not found!"))
+    }
   }
 
   fun stopVM(instanceId: String): Boolean {
@@ -54,7 +64,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     }
 
     if (instanceId == null) {
-      System.err.println("Failed to find instance for $instanceId/$name!")
+      println("Failed to find instance for $$name!")
       return true
     }
 
