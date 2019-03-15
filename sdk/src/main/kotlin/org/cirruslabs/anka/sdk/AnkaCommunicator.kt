@@ -1,7 +1,7 @@
 package org.cirruslabs.anka.sdk
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.apache.http.client.HttpClient
-import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
@@ -19,13 +19,16 @@ import java.io.UnsupportedEncodingException
 import java.net.URI
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLException
 
 class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
   private val API_TIMEOUT = Duration.ofMinutes(2)
 
-  private var scheme: String? = null
+  private val scheme: String = "http"
 
   private val httpClient: HttpClient by lazy {
     HttpClientBuilder.create()
@@ -33,20 +36,13 @@ constructor(private val host: String, private val port: String) {
       .build()
   }
 
-  init {
-    this.scheme = "https"
-    try {
-      val url = String.format("%s://%s:%s", this.scheme, this.host, this.port)
-      this.doRequest(RequestMethod.GET, url)
-    } catch (e: SSLException) {
-      this.scheme = "http"
-    } catch (e: IOException) {
-      e.printStackTrace()
-      throw AnkaException(e)
-    }
-
-    this.listTemplates()
-  }
+  private val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(
+    2,
+    ThreadFactoryBuilder()
+      .setNameFormat("anka-controller-pool-%d")
+      .setDaemon(true)
+      .build()
+  )
 
   @Throws(AnkaException::class)
   fun listTemplates(): List<AnkaVmTemplate> {
@@ -240,15 +236,13 @@ constructor(private val host: String, private val port: String) {
       AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
     }
 
-    request.config =
-      RequestConfig.custom()
-        .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
-        .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
-        .setSocketTimeout(API_TIMEOUT.toMillis().toInt())
-        .build()
-
     try {
+      val abortFuture = executor.schedule({
+        println("Aborting request $url with body $requestBody!")
+        request.abort()
+      }, API_TIMEOUT.seconds, TimeUnit.SECONDS)
       val response = httpClient.execute(request)
+      abortFuture.cancel(true)
       val responseCode = response.statusLine.statusCode
       if (responseCode != 200) {
         println(response.toString())
