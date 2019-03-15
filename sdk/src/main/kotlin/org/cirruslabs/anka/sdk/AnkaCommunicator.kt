@@ -1,11 +1,15 @@
 package org.cirruslabs.anka.sdk
 
+import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.*
-import org.apache.http.client.utils.HttpClientUtils
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpRequestBase
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -22,6 +26,12 @@ constructor(private val host: String, private val port: String) {
   private val API_TIMEOUT = Duration.ofMinutes(2)
 
   private var scheme: String? = null
+
+  private val httpClient: HttpClient by lazy {
+    HttpClientBuilder.create()
+      .setConnectionManager(PoolingHttpClientConnectionManager())
+      .build()
+  }
 
   init {
     this.scheme = "https"
@@ -216,17 +226,9 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(IOException::class, AnkaException::class)
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
-    val httpClient = HttpClientBuilder.create()
-      .setDefaultRequestConfig(
-        RequestConfig.custom()
-          .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
-          .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
-          .setSocketTimeout(API_TIMEOUT.toMillis().toInt())
-          .build()
-      )
-      .build()
     println("Making $method request to $url with body: $requestBody")
-    val request: HttpRequestBase  = when (method) {
+
+    val request: HttpRequestBase = when (method) {
       AnkaCommunicator.RequestMethod.POST -> {
         val postRequest = HttpPost(url)
         setBody(postRequest, requestBody!!)
@@ -237,10 +239,16 @@ constructor(private val host: String, private val port: String) {
       }
       AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
     }
-    var response: CloseableHttpResponse? = null
+
+    request.config =
+      RequestConfig.custom()
+        .setConnectTimeout(API_TIMEOUT.toMillis().toInt())
+        .setConnectionRequestTimeout(API_TIMEOUT.toMillis().toInt())
+        .setSocketTimeout(API_TIMEOUT.toMillis().toInt())
+        .build()
 
     try {
-      response = httpClient.execute(request)
+      val response = httpClient.execute(request)
       val responseCode = response.statusLine.statusCode
       if (responseCode != 200) {
         println(response.toString())
@@ -265,8 +273,6 @@ constructor(private val host: String, private val port: String) {
       throw AnkaException(e)
     } finally {
       request.releaseConnection()
-      HttpClientUtils.closeQuietly(response)
-      HttpClientUtils.closeQuietly(httpClient)
     }
     return null
   }
