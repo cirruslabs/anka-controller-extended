@@ -1,11 +1,13 @@
 package org.cirruslabs.anka.sdk
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpRequestBase
+import org.apache.http.client.utils.HttpClientUtils
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
@@ -236,12 +238,13 @@ constructor(private val host: String, private val port: String) {
       AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
     }
 
+    var response: HttpResponse? = null
     try {
       val abortFuture = executor.schedule({
         println("Aborting request $url with body $requestBody!")
         request.abort()
       }, API_TIMEOUT.seconds, TimeUnit.SECONDS)
-      val response = httpClient.execute(request)
+      response = httpClient.execute(request)
       abortFuture.cancel(true)
       val responseCode = response.statusLine.statusCode
       if (responseCode != 200) {
@@ -266,6 +269,7 @@ constructor(private val host: String, private val port: String) {
       e.printStackTrace()
       throw AnkaException(e)
     } finally {
+      HttpClientUtils.closeQuietly(response)
       request.releaseConnection()
     }
     return null
