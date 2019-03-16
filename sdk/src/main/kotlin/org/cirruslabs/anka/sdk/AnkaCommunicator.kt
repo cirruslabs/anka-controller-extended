@@ -1,30 +1,17 @@
 package org.cirruslabs.anka.sdk
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.apache.http.HttpResponse
-import org.apache.http.client.HttpClient
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpRequestBase
-import org.apache.http.client.utils.HttpClientUtils
-import org.apache.http.conn.HttpHostConnectException
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import org.json.JSONObject
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.io.UnsupportedEncodingException
 import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLException
 
 class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
@@ -32,11 +19,9 @@ constructor(private val host: String, private val port: String) {
 
   private val scheme: String = "http"
 
-  private val httpClient: HttpClient by lazy {
-    HttpClientBuilder.create()
-      .setConnectionManager(PoolingHttpClientConnectionManager())
+  private val httpClient =
+    HttpClient.newBuilder()
       .build()
-  }
 
   private val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(
     2,
@@ -226,81 +211,44 @@ constructor(private val host: String, private val port: String) {
   private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
     println("Making $method request to $url with body: $requestBody")
 
-    val request: HttpRequestBase = when (method) {
+    val request: HttpRequest = when (method) {
       AnkaCommunicator.RequestMethod.POST -> {
-        val postRequest = HttpPost(url)
-        setBody(postRequest, requestBody!!)
+        HttpRequest.newBuilder()
+          .uri(URI.create(url))
+          .POST(HttpRequest.BodyPublishers.ofString(requestBody?.toString() ?: ""))
+          .timeout(API_TIMEOUT)
+          .build()
       }
       AnkaCommunicator.RequestMethod.DELETE -> {
-        val delRequest = HttpDeleteWithBody(url)
-        setBody(delRequest, requestBody!!)
+        HttpRequest.newBuilder()
+          .uri(URI.create(url))
+          .method("DELETE", HttpRequest.BodyPublishers.ofString(requestBody?.toString() ?: ""))
+          .timeout(API_TIMEOUT)
+          .build()
       }
-      AnkaCommunicator.RequestMethod.GET -> HttpGet(url)
+      AnkaCommunicator.RequestMethod.GET ->
+        HttpRequest.newBuilder()
+          .uri(URI.create(url))
+          .GET()
+          .timeout(API_TIMEOUT)
+          .build()
     }
 
-    var response: HttpResponse? = null
     try {
-      val abortFuture = executor.schedule({
-        println("Aborting request $url with body $requestBody!")
-        request.abort()
-      }, API_TIMEOUT.seconds, TimeUnit.SECONDS)
-      response = httpClient.execute(request)
-      abortFuture.cancel(true)
-      val responseCode = response.statusLine.statusCode
+      val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+      val responseCode = response.statusCode()
       if (responseCode != 200) {
         println(response.toString())
         return null
       }
-      val entity = response.entity
-      if (entity != null) {
-        val rd = BufferedReader(InputStreamReader(entity.content))
-        val responseContent = rd.readText()
-        println("Response for $url with body $requestBody: $responseContent")
-        return JSONObject(responseContent)
-      }
-    } catch (e: HttpHostConnectException) {
-      throw AnkaException(e)
-    } catch (e: SSLException) {
-      throw e
-    } catch (e: UnsupportedEncodingException) {
-      e.printStackTrace()
-      throw RuntimeException(e)
-    } catch (e: IOException) {
+      return JSONObject(response.body())
+    } catch (e: Exception) {
       e.printStackTrace()
       throw AnkaException(e)
-    } finally {
-      HttpClientUtils.closeQuietly(response)
-      request.releaseConnection()
     }
-    return null
-  }
-
-  @Throws(UnsupportedEncodingException::class)
-  private fun setBody(request: HttpEntityEnclosingRequestBase, requestBody: JSONObject): HttpRequestBase {
-    request.setHeader("content-type", "application/json")
-    val body = StringEntity(requestBody.toString())
-    request.entity = body
-    return request
   }
 
   private enum class RequestMethod {
     GET, POST, DELETE
-  }
-
-  internal inner class HttpDeleteWithBody : HttpEntityEnclosingRequestBase {
-
-    constructor(uri: String) : super() {
-      setURI(URI.create(uri))
-    }
-
-    constructor(uri: URI) : super() {
-      setURI(uri)
-    }
-
-    constructor() : super()
-
-    override fun getMethod(): String {
-      return "DELETE"
-    }
   }
 }
