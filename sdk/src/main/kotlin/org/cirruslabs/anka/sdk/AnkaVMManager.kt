@@ -20,6 +20,10 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     .maximumSize(10000)
     .build<String, String>()
 
+  private val failureCache = CacheBuilder.newBuilder()
+    .maximumSize(1000)
+    .build<String, String>()
+
   val queueSize: Int
     get() = queue.size
 
@@ -112,8 +116,12 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     val statusesFromQueue = queue.vmNames.toSet().mapNotNull { vmName ->
       if (vmNames.contains(vmName)) Pair(vmName, "Scheduling") else null
     }.toMap()
-    if (statusesFromQueue.keys.containsAll(vmNames)) {
-      return statusesFromQueue
+    val failedStatuses = vmNames.mapNotNull { vmName ->
+      failureCache.getIfPresent(vmName)?.let { Pair(vmName, "Failed") }
+    }.toMap()
+    val allInMemoryStatuses = statusesFromQueue + failedStatuses
+    if (allInMemoryStatuses.keys.containsAll(vmNames)) {
+      return allInMemoryStatuses
     }
 
     val instances = communicator.listInstances()
@@ -190,7 +198,10 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       startVM(request.templateName, request.tag, request.vmName, request.startupScript)
     } catch (e: Exception) {
       println("Failed to schedule VM ${request.vmName}: ${e.message}")
-      queue.offer(request)
+      val vmName = request.vmName
+      if (vmName != null) {
+        failureCache.put(vmName, e.message ?: "Failed to start a VM!")
+      }
     }
     return true
   }
