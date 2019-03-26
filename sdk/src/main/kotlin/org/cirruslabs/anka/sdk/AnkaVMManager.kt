@@ -145,7 +145,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
         }
       }
     }.toMap()
-    return statusesFromQueue + statusesFromApiByName + statusesFromApiByVmId
+    return statusesFromQueue  + failedStatuses + statusesFromApiByName + statusesFromApiByVmId
   }
 
   fun execute(vm: AnkaVm, script: String): String {
