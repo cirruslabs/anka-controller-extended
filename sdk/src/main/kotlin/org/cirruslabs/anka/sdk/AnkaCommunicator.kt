@@ -236,8 +236,10 @@ constructor(private val host: String, private val port: String) {
     }
 
     try {
-      val responseF = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-      val response = responseF.get(2 * API_TIMEOUT.seconds, TimeUnit.SECONDS)
+      val response =
+        httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+          .orTimeout(2 * API_TIMEOUT.seconds, TimeUnit.SECONDS)
+          .get()
       val responseCode = response.statusCode()
       if (responseCode != 200) {
         println(response.toString())
