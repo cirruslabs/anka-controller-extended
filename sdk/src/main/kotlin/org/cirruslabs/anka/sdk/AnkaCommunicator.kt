@@ -12,6 +12,7 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 class AnkaCommunicator @Throws(AnkaException::class)
 constructor(private val host: String, private val port: String) {
@@ -235,7 +236,8 @@ constructor(private val host: String, private val port: String) {
     }
 
     try {
-      val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+      val responseF = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+      val response = responseF.get(2 * API_TIMEOUT.seconds, TimeUnit.SECONDS)
       val responseCode = response.statusCode()
       if (responseCode != 200) {
         println(response.toString())
