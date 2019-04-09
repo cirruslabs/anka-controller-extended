@@ -6,6 +6,7 @@ import org.cactoos.io.DeadInput
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import org.cirruslabs.anka.sdk.util.MultiOutputStream
 import java.io.ByteArrayOutputStream
+import java.net.http.HttpTimeoutException
 import java.nio.charset.StandardCharsets
 
 
@@ -201,6 +202,9 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       val vmName = request.vmName
       if (vmName != null) {
         failureCache.put(vmName, e.message ?: "Failed to start a VM!")
+      }
+      if (e is AnkaException && e.cause is HttpTimeoutException) {
+        queue.offer(request)
       }
     }
     return true
