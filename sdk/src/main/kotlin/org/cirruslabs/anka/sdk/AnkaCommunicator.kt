@@ -88,7 +88,11 @@ constructor(private val host: String, private val port: String) {
         val nodesJson = jsonResponse.getJSONArray("body")
         for (j in nodesJson) {
           val jsonObj = j as JSONObject
-          templates.add(AnkaVmSession(jsonObj.getString("instance_id"), jsonObj.getJSONObject("vm")))
+          try {
+            templates.add(AnkaVmSession(jsonObj.getString("instance_id"), jsonObj.getJSONObject("vm")))
+          } catch (e: Exception) {
+            e.printStackTrace()
+          }
         }
       }
     } catch (e: IOException) {
