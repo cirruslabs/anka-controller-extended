@@ -12,12 +12,13 @@ MAINTAINER Fedor fedor.korotkov@gmail.com;
 
 WORKDIR /svc/anka-controller-extended
 ADD scripts/entrypoint.sh /svc/anka-controller-extended
+ADD scripts/heatlthcheck.sh /svc/anka-controller-extended
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		openconnect \
 	&& rm -rf /var/lib/apt/lists/*
 
-HEALTHCHECK CMD curl --fail http://localhost:8081/healthcheck || exit 1
+HEALTHCHECK CMD ./heatlthcheck.sh
 
 EXPOSE 8080
 EXPOSE 8081

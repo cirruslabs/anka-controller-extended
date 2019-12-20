@@ -60,6 +60,7 @@ gcloud compute firewall-rules create allow-grpc \
 
 ```bash
 docker run --privileged \
+  -p 8080:8080 -p 8081:8081 -p 8239:8239 \
   --env-file $PATH_TO_ENV_FILE \
   docker.io/cirrusci/anka-controller-extended:latest
 ```
