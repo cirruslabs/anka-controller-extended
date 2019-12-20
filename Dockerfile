@@ -1,4 +1,4 @@
-FROM gradle:5.2-jdk11 as builder
+FROM openjdk:13-buster as builder
 
 USER root
 WORKDIR /tmp/build
@@ -6,7 +6,7 @@ ADD . /tmp/build/
 
 RUN ./gradlew clean :impl:shadowJar --stacktrace --no-daemon
 
-FROM openjdk:11
+FROM openjdk:13-buster
 
 MAINTAINER Fedor fedor.korotkov@gmail.com;
 

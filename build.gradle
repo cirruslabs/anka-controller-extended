@@ -4,21 +4,23 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.fkorotkov:gradle-libraries-plugin:0.1'
+    classpath 'com.fkorotkov:gradle-libraries-plugin:1.0'
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.1'
   }
 }
 
 apply plugin: 'com.fkorotkov.libraries'
 
-updateLibraries.resolutionStrategy = {
-  componentSelection { rules ->
-    rules.all { ComponentSelection selection ->
-      boolean rejected = ['dev', 'eap', 'M1'].any { qualifier ->
-        selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
-      }
-      if (rejected) {
-        selection.reject('dev version')
+updateLibraries {
+  resolutionStrategy {
+    componentSelection { rules ->
+      rules.all { ComponentSelection selection ->
+        boolean rejected = ['dev', 'eap', 'M1'].any { qualifier ->
+          selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+        }
+        if (rejected) {
+          selection.reject('dev version')
+        }
       }
     }
   }

@@ -12,7 +12,7 @@ abstract class ClientFactoryTest {
   @Test
   fun testConnection() {
     val channel = ManagedChannelBuilder.forTarget("IP:8239")
-      .usePlaintext(true)
+      .usePlaintext()
       .build()
     val client = ClientFactory.create(channel)
     val request = VMStatusRequest.newBuilder()
