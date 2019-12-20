@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 if ! pgrep -x "openconnect" > /dev/null
 then
   if [[ -v ANYCONNECT_SERVER ]]; then
