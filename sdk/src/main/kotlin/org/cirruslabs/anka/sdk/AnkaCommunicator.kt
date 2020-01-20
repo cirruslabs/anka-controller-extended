@@ -1,43 +1,36 @@
 package org.cirruslabs.anka.sdk
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder
+import com.google.common.net.HttpHeaders
 import org.cirruslabs.anka.sdk.exceptions.AnkaException
 import org.json.JSONObject
 import java.io.IOException
 import java.net.URI
+import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 class AnkaCommunicator @Throws(AnkaException::class)
-constructor(private val host: String, private val port: String) {
+constructor(
+  private val controllerURL: URL,
+  private val username: String? = null,
+  private val password: String? = null
+) {
   private val API_TIMEOUT = Duration.ofMinutes(2)
-
-  private val scheme: String = "http"
 
   private val httpClient =
     HttpClient.newBuilder()
       .build()
 
-  private val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(
-    2,
-    ThreadFactoryBuilder()
-      .setNameFormat("anka-controller-pool-%d")
-      .setDaemon(true)
-      .build()
-  )
-
   @Throws(AnkaException::class)
   fun listTemplates(): List<AnkaVmTemplate> {
     val templates = ArrayList<AnkaVmTemplate>()
-    val url = String.format("%s://%s:%s/api/v1/registry/vm", this.scheme, this.host, this.port)
+    val endpoint = String.format("api/v1/registry/vm")
     try {
-      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val jsonResponse = this.doRequest(RequestMethod.GET, endpoint)
       val logicalResult = jsonResponse!!.getString("status")
       if (logicalResult == "OK") {
         val vmsJson = jsonResponse.getJSONArray("body")
@@ -59,9 +52,9 @@ constructor(private val host: String, private val port: String) {
   @Throws(AnkaException::class)
   fun listNodes(): List<AnkaNodeInfo> {
     val templates = ArrayList<AnkaNodeInfo>()
-    val url = String.format("%s://%s:%s/api/v1/node", this.scheme, this.host, this.port)
+    val endpoint = String.format("api/v1/node")
     try {
-      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val jsonResponse = this.doRequest(RequestMethod.GET, endpoint)
       val logicalResult = jsonResponse!!.getString("status")
       if (logicalResult == "OK") {
         val nodesJson = jsonResponse.getJSONArray("body")
@@ -80,9 +73,9 @@ constructor(private val host: String, private val port: String) {
   @Throws(AnkaException::class)
   fun listInstances(): List<AnkaVmSession> {
     val templates = ArrayList<AnkaVmSession>()
-    val url = String.format("%s://%s:%s/api/v1/vm", this.scheme, this.host, this.port)
+    val endpoint = String.format("api/v1/vm")
     try {
-      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val jsonResponse = this.doRequest(RequestMethod.GET, endpoint)
       val logicalResult = jsonResponse!!.getString("status")
       if (logicalResult == "OK") {
         val nodesJson = jsonResponse.getJSONArray("body")
@@ -105,9 +98,9 @@ constructor(private val host: String, private val port: String) {
   @Throws(AnkaException::class)
   fun getTemplateTags(templateId: String): List<String> {
     val tags = ArrayList<String>()
-    val url = String.format("%s://%s:%s/api/v1/registry/vm?id=%s", this.scheme, this.host, this.port, templateId)
+    val endpoint = String.format("api/v1/registry/vm?id=%s", templateId)
     try {
-      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val jsonResponse = this.doRequest(RequestMethod.GET, endpoint)
       val logicalResult = jsonResponse!!.getString("status")
       if (logicalResult == "OK") {
         val templateVm = jsonResponse.getJSONObject("body")
@@ -119,9 +112,9 @@ constructor(private val host: String, private val port: String) {
         }
       }
     } catch (e: IOException) {
-      System.err.printf("Exception trying to access: '%s'", url)
+      System.err.printf("Exception trying to access: '%s'", endpoint)
     } catch (e: org.json.JSONException) {
-      System.err.printf("Exception trying to parse response: '%s'", url)
+      System.err.printf("Exception trying to parse response: '%s'", endpoint)
     }
 
     return tags
@@ -129,7 +122,7 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(AnkaException::class)
   fun startVm(templateId: String, tag: String?, nameTemplate: String?, startupScript: String?): String {
-    val url = String.format("%s://%s:%s/api/v1/vm", this.scheme, this.host, this.port)
+    val endpoint = String.format("api/v1/vm")
     val jsonObject = JSONObject()
     jsonObject.put("vmid", templateId)
     if (tag != null)
@@ -140,7 +133,7 @@ constructor(private val host: String, private val port: String) {
       jsonObject.put("startup_script", Base64.getEncoder().encodeToString(startupScript.toByteArray()))
     var jsonResponse: JSONObject? = null
     try {
-      jsonResponse = this.doRequest(RequestMethod.POST, url, jsonObject)
+      jsonResponse = this.doRequest(RequestMethod.POST, endpoint, jsonObject)
     } catch (e: IOException) {
       e.printStackTrace()
       throw AnkaException(e)
@@ -158,9 +151,9 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(AnkaException::class)
   fun showVm(sessionId: String): AnkaVmSession? {
-    val url = String.format("%s://%s:%s/api/v1/vm?id=%s", this.scheme, this.host, this.port, sessionId)
+    val endpoint = String.format("api/v1/vm?id=%s", sessionId)
     try {
-      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val jsonResponse = this.doRequest(RequestMethod.GET, endpoint)
       val logicalResult = jsonResponse!!.getString("status")
       if (logicalResult == "OK") {
         val body = jsonResponse.getJSONObject("body")
@@ -176,11 +169,11 @@ constructor(private val host: String, private val port: String) {
 
   @Throws(AnkaException::class)
   fun terminateVm(sessionId: String): Boolean {
-    val url = String.format("%s://%s:%s/api/v1/vm", this.scheme, this.host, this.port)
+    val endpoint = String.format("api/v1/vm")
     return try {
       val jsonObject = JSONObject()
       jsonObject.put("id", sessionId)
-      val jsonResponse = this.doRequest(RequestMethod.DELETE, url, jsonObject)
+      val jsonResponse = this.doRequest(RequestMethod.DELETE, endpoint, jsonObject)
       val logicalResult = jsonResponse!!.getString("status")
       logicalResult == "OK"
     } catch (e: IOException) {
@@ -194,9 +187,9 @@ constructor(private val host: String, private val port: String) {
   @Throws(AnkaException::class)
   private fun list(): List<String> {
     val vmIds = ArrayList<String>()
-    val url = String.format("%s://%s:%s/list", this.scheme, this.host, this.port)
+    val endpoint = String.format("list")
     return try {
-      val jsonResponse = this.doRequest(RequestMethod.GET, url)
+      val jsonResponse = this.doRequest(RequestMethod.GET, endpoint)
       val logicalResult = jsonResponse!!.getString("result")
       if (logicalResult == "OK") {
         val vmsJson = jsonResponse.getJSONArray("instance_id")
@@ -213,35 +206,39 @@ constructor(private val host: String, private val port: String) {
   }
 
   @Throws(IOException::class, AnkaException::class)
-  private fun doRequest(method: RequestMethod, url: String, requestBody: JSONObject? = null): JSONObject? {
-    println("Making $method request to $url with body: $requestBody")
+  private fun doRequest(method: RequestMethod, endpoint: String, requestBody: JSONObject? = null): JSONObject? {
+    println("Making $method request to $endpoint with body: $requestBody")
 
-    val request: HttpRequest = when (method) {
+    val url = URI.create("$controllerURL$endpoint")
+    
+    val requestBuilder: HttpRequest.Builder = when (method) {
       AnkaCommunicator.RequestMethod.POST -> {
         HttpRequest.newBuilder()
-          .uri(URI.create(url))
+          .uri(url)
           .POST(HttpRequest.BodyPublishers.ofString(requestBody?.toString() ?: ""))
           .timeout(API_TIMEOUT)
-          .build()
       }
       AnkaCommunicator.RequestMethod.DELETE -> {
         HttpRequest.newBuilder()
-          .uri(URI.create(url))
+          .uri(url)
           .method("DELETE", HttpRequest.BodyPublishers.ofString(requestBody?.toString() ?: ""))
           .timeout(API_TIMEOUT)
-          .build()
       }
       AnkaCommunicator.RequestMethod.GET ->
         HttpRequest.newBuilder()
-          .uri(URI.create(url))
+          .uri(url)
           .GET()
           .timeout(API_TIMEOUT)
-          .build()
+    }
+
+    if (username != null && password != null) {
+      val encodedAuth = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
+      requestBuilder.header(HttpHeaders.AUTHORIZATION, "Basic $encodedAuth")
     }
 
     try {
       val response =
-        httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        httpClient.sendAsync(requestBuilder.build(), HttpResponse.BodyHandlers.ofString())
           .orTimeout(2 * API_TIMEOUT.seconds, TimeUnit.SECONDS)
           .get()
       val responseCode = response.statusCode()

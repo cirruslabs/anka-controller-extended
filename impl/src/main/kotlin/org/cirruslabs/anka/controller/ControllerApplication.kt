@@ -1,5 +1,8 @@
 package org.cirruslabs.anka.controller
 
+import com.google.common.util.concurrent.ListeningExecutorService
+import com.google.common.util.concurrent.MoreExecutors
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.dropwizard.Application
 import io.dropwizard.setup.Environment
 import io.grpc.ServerBuilder
@@ -9,22 +12,34 @@ import org.cirruslabs.anka.controller.auth.AccessTokenServerInterceptor
 import org.cirruslabs.anka.controller.config.AuthApplicationConfiguration
 import org.cirruslabs.anka.controller.health.ManagerHealthCheck
 import org.cirruslabs.anka.controller.health.ThreadHealthCheck
+import org.cirruslabs.anka.controller.resources.HealthzResource
 import org.cirruslabs.anka.sdk.AnkaCommunicator
 import org.cirruslabs.anka.sdk.AnkaVMManager
+import java.net.URL
+import java.util.concurrent.Executors
 
 fun main(vararg args: String) {
   ControllerApplication().run(*args)
 }
 
 class ControllerApplication : Application<AuthApplicationConfiguration>() {
+  val mainExecutor: ListeningExecutorService = MoreExecutors.listeningDecorator(
+    Executors.newCachedThreadPool(
+      ThreadFactoryBuilder()
+        .setNameFormat("cirrus-main-pool-%d")
+        .build()
+    )
+  )
 
   override fun run(configuration: AuthApplicationConfiguration, environment: Environment) {
     val grpcConfig = configuration.grpc ?: throw IllegalStateException("grpc config should be provided!")
 
     val env = System.getenv()
     val communicator = AnkaCommunicator(
-      env["ANKA_HOST"] ?: throw IllegalStateException("ANKA_HOST environment variable should be defined!"),
-      env["ANKA_PORT"] ?: throw IllegalStateException("ANKA_PORT environment variable should be defined!")
+      env["CONTROLLER_URL"]?.let { URL(it) }
+        ?: throw IllegalStateException("CONTROLLER_URL environment variable should be defined!"),
+      env["AUTH_USERNAME"],
+      env["AUTH_PASSWORD"]
     )
 
     val vmManager = AnkaVMManager(communicator)
@@ -41,6 +56,11 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
       .addService(ServerInterceptors.intercept(serviceImpl, interceptors))
       .build()
       .start()
+
+    environment.jersey().apply {
+      val healthzResource = HealthzResource(mainExecutor, environment.healthChecks())
+      register(healthzResource)
+    }
 
     // available at /healthcheck
     val healthCheck = ManagerHealthCheck(vmManager)
