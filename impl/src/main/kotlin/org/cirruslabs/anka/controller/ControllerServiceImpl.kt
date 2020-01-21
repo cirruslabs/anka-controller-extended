@@ -145,6 +145,7 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
             .groupBy { it.sessionState ?: "Undefined" }
             .mapValues { (_, instances) -> instances.size.toLong() }
         )
+        .setRemainingCapacity(nodes.map { it.remainingCapacity }.sum().toLong())
         .build()
       responseObserver.onNext(response)
       responseObserver.onCompleted()

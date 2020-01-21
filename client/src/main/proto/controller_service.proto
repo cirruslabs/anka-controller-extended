@@ -88,4 +88,5 @@ message GetStatsResponse {
   int64 active_nodes_size = 3;
   int64 offline_nodes_size = 4;
   map<string, int64> instance_count_by_statuses = 5;
+  int64 remaining_capacity = 6;
 }
