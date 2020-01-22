@@ -5,10 +5,10 @@ import org.cirruslabs.anka.sdk.AnkaCommunicator
 import org.cirruslabs.anka.sdk.AnkaVMManager
 import org.cirruslabs.anka.sdk.AnkaVmTemplate
 import org.junit.Assert.*
-import org.junit.Test
+import java.net.URL
 
 class AnkaVMManagerTest {
-  val communicator = AnkaCommunicator("10.254.55.2", "80")
+  val communicator = AnkaCommunicator(URL("http://10.254.55.2:80/"))
   val manager = AnkaVMManager(communicator)
 
   val testTemplate = "high-sierra-base"

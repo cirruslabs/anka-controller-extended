@@ -2,6 +2,7 @@ package org.cirruslabs.anka.controller
 
 import com.google.protobuf.Empty
 import io.grpc.stub.StreamObserver
+import org.cirruslabs.anka.controller.converter.toProto
 import org.cirruslabs.anka.controller.grpc.*
 import org.cirruslabs.anka.sdk.AnkaVMManager
 
@@ -127,6 +128,20 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
         .build()
       responseObserver.onNext(response)
       responseObserver.onCompleted()
+    }
+  }
+
+  override fun listVMs(request: Empty, responseObserver: StreamObserver<VMListResponse>) {
+    try {
+      val instances = manager.communicator.listInstances().mapNotNull { it.vmInfo }
+      val response = VMListResponse.newBuilder()
+        .addAllInstances(instances.map { it.toProto() })
+        .build()
+      responseObserver.onNext(response)
+      responseObserver.onCompleted()
+    } catch (e: Exception) {
+      e.printStackTrace()
+      responseObserver.onError(e)
     }
   }
 

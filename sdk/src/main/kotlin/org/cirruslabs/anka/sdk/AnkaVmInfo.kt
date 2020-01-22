@@ -8,6 +8,7 @@ data class AnkaVmInfo(
   val status: String,
   val vmIp: String,
   val hostIp: String,
+  val nodeId: String,
   val portForwardingRules: List<PortForwardingRule>
 ) {
   constructor(jsonObject: JSONObject) : this(
@@ -16,6 +17,7 @@ data class AnkaVmInfo(
     jsonObject.getString("status"),
     jsonObject.getString("ip"),
     jsonObject.getString("host_ip"),
+    jsonObject.getString("node_id"),
     if (!jsonObject.isNull("port_forwarding")) {
       jsonObject.getJSONArray("port_forwarding").map {
         PortForwardingRule(it as JSONObject)
