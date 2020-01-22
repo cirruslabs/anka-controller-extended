@@ -35,8 +35,16 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
     val grpcConfig = configuration.grpc ?: throw IllegalStateException("grpc config should be provided!")
 
     val env = System.getenv()
+
+    // for backward compatibility
+    val urlViaObsoleteVars = if (env.containsKey("ANKA_HOST")) {
+      "http://" + listOfNotNull(env["ANKA_HOST"], env["ANKA_PORT"]).joinToString(separator = ":")
+    } else {
+      null
+    }
+
     val communicator = AnkaCommunicator(
-      env["CONTROLLER_URL"]?.let { URL(it) }
+      (env["CONTROLLER_URL"] ?: urlViaObsoleteVars)?.let { URL(it) }
         ?: throw IllegalStateException("CONTROLLER_URL environment variable should be defined!"),
       env["AUTH_USERNAME"],
       env["AUTH_PASSWORD"]
