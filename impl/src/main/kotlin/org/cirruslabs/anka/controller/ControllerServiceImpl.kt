@@ -35,13 +35,14 @@ class ControllerServiceImpl(val manager: AnkaVMManager) : ControllerGrpc.Control
   override fun stopVM(request: StopVMRequest, responseObserver: StreamObserver<StopVMResponse>) {
     try {
       println("Stopping VM ${request.vmId}${request.vmName}...")
-      val success = when (request.identifierCase) {
+      val (success, nodeId) = when (request.identifierCase) {
         StopVMRequest.IdentifierCase.VM_ID -> manager.stopVM(request.vmId)
         StopVMRequest.IdentifierCase.VM_NAME -> manager.stopVMByName(request.vmName)
         else -> throw IllegalStateException("No vmId or vmName is provided!")
       }
       val response = StopVMResponse.newBuilder()
         .setSuccess(success)
+        .setNodeId(nodeId ?: "")
         .build()
       println("Stopped VM ${request.vmId}!")
       responseObserver.onNext(response)

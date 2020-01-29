@@ -61,6 +61,7 @@ message StopVMRequest {
 message StopVMResponse {
   bool success = 1;
   string error_message = 2;
+  string node_id = 3;
 }
 
 message VMStatusRequest {
