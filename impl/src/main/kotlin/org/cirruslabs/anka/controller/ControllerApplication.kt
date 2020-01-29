@@ -38,7 +38,7 @@ class ControllerApplication : Application<AuthApplicationConfiguration>() {
 
     // for backward compatibility
     val urlViaObsoleteVars = if (env.containsKey("ANKA_HOST")) {
-      "http://" + listOfNotNull(env["ANKA_HOST"], env["ANKA_PORT"]).joinToString(separator = ":")
+      "http://" + listOfNotNull(env["ANKA_HOST"], env["ANKA_PORT"]).joinToString(separator = ":") + "/"
     } else {
       null
     }
