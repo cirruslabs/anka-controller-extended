@@ -243,10 +243,12 @@ constructor(
           .get()
       val responseCode = response.statusCode()
       if (responseCode != 200) {
-        println(response.toString())
+        println("Bad response $responseCode for $endpoint: $response")
         return null
       }
-      return JSONObject(response.body())
+      val body = response.body()
+      println("Response $responseCode for $endpoint: $body")
+      return JSONObject(body)
     } catch (e: Exception) {
       e.printStackTrace()
       throw AnkaException(e)
