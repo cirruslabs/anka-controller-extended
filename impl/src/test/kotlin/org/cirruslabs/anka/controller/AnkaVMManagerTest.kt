@@ -39,7 +39,8 @@ class AnkaVMManagerTest {
       val output = manager.execute(vm, "pwd\necho \$USER")
       assertEquals("/Users/anka\nanka\n", output)
     } finally {
-      assertTrue(manager.stopVM(instanceId))
+      val (result, _) = manager.stopVM(instanceId)
+      assertTrue(result)
     }
   }
 
@@ -48,6 +49,7 @@ class AnkaVMManagerTest {
     assertNotNull("Please make sure your local registry has $testTemplate template", findTemplate(testTemplate))
     val vmName = "test2"
     manager.scheduleVM(testTemplate, vmName = vmName)
-    assertTrue(manager.stopVMByName(vmName))
+  val (result, _) = manager.stopVMByName(vmName)
+  assertTrue(result)
   }
 }
