@@ -17,6 +17,10 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     .maximumSize(10000)
     .build<String, String>()
 
+  private val recentlyRemovedVMs = CacheBuilder.newBuilder()
+    .maximumSize(1000)
+    .build<String, Long>()
+
   private val templateIdCache = CacheBuilder.newBuilder()
     .maximumSize(10000)
     .build<String, String>()
@@ -33,7 +37,13 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
     val templateId = findTemplateByName(templateName)
     val instanceId = communicator.startVm(templateId, tag, vmName, startupScript)
     println("Started VM $templateName:$tag with name $vmName! Instance id is $instanceId")
-    if (vmName != null) {
+    if (vmName == null) {
+      return instanceId
+    }
+    if (recentlyRemovedVMs.getIfPresent(vmName) != null) {
+      val result = communicator.terminateVm(instanceId)
+      println("VM $vmName was removed while creating! Let's clean up! Result: $result")
+    } else {
       instanceIdCache.put(vmName, instanceId)
     }
     return instanceId
@@ -52,6 +62,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   }
 
   fun stopVMByName(name: String): Pair<Boolean, String?> {
+    recentlyRemovedVMs.put(name, System.currentTimeMillis())
     val queuedRequest = queue.findByVMName(name)
     if (queuedRequest != null) {
       println("Removed vm $name from the queue")
@@ -68,7 +79,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
       println("Trying to find instance for $name vm via API: $instanceId...")
       val instance = communicator.listInstances().find { it.vmInfo?.name?.endsWith(name) ?: false }
       if (instance == null) {
-        println("Failed to find instance for $$name!")
+        println("Failed to find instance for $name!")
         return true to null
       }
       instanceId = instance.id
