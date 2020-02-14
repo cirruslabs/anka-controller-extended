@@ -52,7 +52,6 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
   }
 
   fun stopVMByName(name: String): Pair<Boolean, String?> {
-    println("Stopping vm $name")
     val queuedRequest = queue.findByVMName(name)
     if (queuedRequest != null) {
       println("Removed vm $name from the queue")
@@ -63,17 +62,18 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
 
     if (instanceId != null) {
       println("Got instance id $instanceId for $name vm from cache!")
+      val instance = communicator.listInstances().find { it.id == instanceId }
+      nodeId = instance?.vmInfo?.nodeId
     } else {
       println("Trying to find instance for $name vm via API: $instanceId...")
-      val instance = communicator.listInstances().find { it.vmInfo?.name == name }
-      instanceId = instance?.id
-      nodeId = instance?.vmInfo?.nodeId
-      println("Tried to find instance for $name vm via API: $instanceId")
-    }
-
-    if (instanceId == null) {
-      println("Failed to find instance for $$name!")
-      return true to null
+      val instance = communicator.listInstances().find { it.vmInfo?.name?.endsWith(name) ?: false }
+      if (instance == null) {
+        println("Failed to find instance for $$name!")
+        return true to null
+      }
+      instanceId = instance.id
+      nodeId = instance.vmInfo?.nodeId
+      println("Found instance for $name vm via API: $instanceId")
     }
 
     instanceIdCache.invalidate(name)
