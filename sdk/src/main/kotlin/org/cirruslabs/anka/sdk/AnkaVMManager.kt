@@ -8,6 +8,7 @@ import org.cirruslabs.anka.sdk.util.MultiOutputStream
 import java.io.ByteArrayOutputStream
 import java.net.http.HttpTimeoutException
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 
 
 class AnkaVMManager(val communicator: AnkaCommunicator) {
@@ -23,6 +24,7 @@ class AnkaVMManager(val communicator: AnkaCommunicator) {
 
   private val templateIdCache = CacheBuilder.newBuilder()
     .maximumSize(10000)
+    .expireAfterWrite(1, TimeUnit.DAYS)
     .build<String, String>()
 
   private val failureCache = CacheBuilder.newBuilder()
